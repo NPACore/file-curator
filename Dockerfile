@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y git && \
     pip install -r /opt/requirements.txt && \
     mkdir -p $FLYWHEEL
 
-COPY run.py manifest.json $FLYWHEEL/
-COPY flywheel_hierarchy_curator $FLYWHEEL/flywheel_hierarchy_curator
+COPY run.py manifest.json parser.py $FLYWHEEL/
 
 WORKDIR $FLYWHEEL
