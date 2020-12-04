@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Dict, Any
 
 import flywheel
 from flywheel_gear_toolkit import GearToolkitContext
@@ -19,8 +20,8 @@ class Curator(FileCurator):
                 output_path=(Path(self.context.output_dir) / "test.csv")
             )
 
-    def curate_file(self, file_: flywheel.FileEntry):
+    def curate_file(self, file_: Dict[str, Any]):
         if self.reporter:
             self.reporter.append_log(
-                container_type=file_.container_type, container_label=file_.name
+                container_type=file_, container_label=file_.get("location").get("name")
             )
