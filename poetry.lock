@@ -99,8 +99,8 @@ flywheel-sdk = "^14.2.0"
 [package.source]
 type = "git"
 url = "https://gitlab.com/flywheel-io/public/gear-toolkit.git"
-reference = "master"
-resolved_reference = "d7533779d46d33cfd0bb32db95ee33a91e7d6d0d"
+reference = "curator-update"
+resolved_reference = "dc4889ea92dc43b1cd108afccc46cab0162df76f"
 
 [[package]]
 name = "flywheel-gears"
@@ -135,7 +135,7 @@ pypng = "^0.0.20"
 type = "git"
 url = "https://gitlab.com/flywheel-io/flywheel-apps/hierarchy-curator.git"
 reference = "1.0.0-dev"
-resolved_reference = "284815e9e94b964f45734d1a69ab01123f5080a4"
+resolved_reference = "6c6cc44aaec74f57e9f548583386caa9d0e5468d"
 
 [[package]]
 name = "flywheel-sdk"
@@ -483,7 +483,7 @@ socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "13807c6fbecc420161d51f57931e3ee38f777348e292548518e19384ee2ba273"
+content-hash = "9ee8b31c7b4f9ddf7cd52785140e43531e147ccb5ada37a29ed02394d2127d4b"
 
 [metadata.files]
 atomicwrites = [
