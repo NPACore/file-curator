@@ -100,7 +100,7 @@ flywheel-sdk = "^14.2.0"
 type = "git"
 url = "https://gitlab.com/flywheel-io/public/gear-toolkit.git"
 reference = "curator-update"
-resolved_reference = "dc4889ea92dc43b1cd108afccc46cab0162df76f"
+resolved_reference = "6250a74112accbf35417f2c5485ac735ed7e8593"
 
 [[package]]
 name = "flywheel-gears"
