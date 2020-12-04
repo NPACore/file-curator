@@ -34,7 +34,7 @@ def main(gear_context: GearToolkitContext) -> None:
         log.info(f"Installing requirements from {optional_requirements}")
         install_requirements(optional_requirements)
 
-    log.info(f"Curating {file_input.name}")
+    log.info(f"Curating {file_input.get('location').get('name')}")
 
     curate(
         gear_context,
