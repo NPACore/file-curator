@@ -1,11 +1,11 @@
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, Any
 from flywheel_gear_toolkit import GearToolkitContext
 import flywheel
 
 
 def parse_config(
     gear_context: GearToolkitContext,
-) -> Tuple[str, flywheel.FileEntry, Dict[str, Optional[str]], Optional[str]]:
+) -> Tuple[str, Dict[str, Any], Dict[str, Optional[str]], Optional[str]]:
     """Parse gear config
 
     Args:
@@ -15,7 +15,7 @@ def parse_config(
         Tuple[str, str, Dict[str, Optional[str]], Optional[str]]: 
             tuple containing:
                 - (str) path to curator
-                - (flywheel.FileEntry) input file
+                - (Dict[str,Any]) input file
                 - (Dict[str,Optional[str]]) Dictionary of optional additional inputs
                 - (Optional[str]) optional requirements to install
     """
