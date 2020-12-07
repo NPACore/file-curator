@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import logging
+import parser
 
 import flywheel
 from flywheel_gear_toolkit import GearToolkitContext
-from flywheel_gear_toolkit.utils import install_requirements, datatypes
-
+from flywheel_gear_toolkit.utils import datatypes, install_requirements
 from flywheel_hierarchy_curator.curate import get_curator
-import parser
 
 log = logging.getLogger(__name__)
 

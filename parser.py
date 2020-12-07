@@ -1,6 +1,7 @@
-from typing import Tuple, Dict, Optional, Any
-from flywheel_gear_toolkit import GearToolkitContext
+from typing import Any, Dict, Optional, Tuple
+
 import flywheel
+from flywheel_gear_toolkit import GearToolkitContext
 
 
 def parse_config(

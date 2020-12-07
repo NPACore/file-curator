@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 import logging
-
-import pytest
-import flywheel
-from flywheel_gear_toolkit import GearToolkitContext
-from flywheel_gear_toolkit.utils import install_requirements, datatypes
-
-from flywheel_hierarchy_curator.curate import get_curator
-import run
-from pathlib import Path
 import os
-
+from pathlib import Path
 from unittest.mock import MagicMock
+
+import flywheel
+import pytest
+from flywheel_gear_toolkit import GearToolkitContext
+from flywheel_gear_toolkit.utils import datatypes, install_requirements
+from flywheel_hierarchy_curator.curate import get_curator
+
+import run
 
 GROUP = "scien"
 PROJECT = "Nate-BIDS-test"
@@ -35,4 +34,3 @@ def test_file_curator(mocker):
     gear_context.output_dir = OUTPUT
 
     run.main(gear_context)
-
