@@ -51,14 +51,14 @@ variables:
     - poetry install
 
 pre:format:
-  extends: .python
+  extends: .python-gears
   stage: pre
   script:
    - '[ $ISORT = "true" ] && poetry run isort $CI_PROJECT_DIR'
    - '[ $BLACK = "true" ] && poetry black $BLACK_ARGS $CI_PROJECT_DIR'
 
 pre:deps:
-  extends: .python
+  extends: .python-geras
   stage: pre
   script:
     - poetry export -f requirements.txt --without-hashes > requirements.txt
