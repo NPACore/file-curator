@@ -54,7 +54,7 @@ pre:format:
   stage: pre
   script:
    - '[ $ISORT = "true" ] && poetry run isort $CI_PROJECT_DIR'
-   - '[ $BLACK = "true" ] && poetry black $BLACK_ARGS $CI_PROJECT_DIR'
+   - '[ $BLACK = "true" ] && poetry run black $BLACK_ARGS $CI_PROJECT_DIR'
 
 pre:deps:
   extends: .python-gears
