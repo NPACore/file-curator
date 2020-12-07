@@ -20,14 +20,13 @@ stages:
 # thus triggering the publish script
 
 variables:
-  PYTHON_VERSION: '3.7'
+  PYTHON_VERSION: '3.8'
   PACKAGE_DIR: flywheel_gear_toolkit/
-  PYLINT: "false"
-  PYCODESTYLE: "false"
   BLACK: "true"
   PYPI: "true"
+  LEGACY_TEST: "false"
   PIP_EXTRA: "[dev]"
-  DOC: "true"
+  DOC: "false"
   POETRY: "true"
   PYTEST_COVERAGE: "false"
   CACHE_DIR: "$CI_PROJECT_DIR/.cache"
@@ -113,6 +112,10 @@ test:unit:
     reports:
       cobertura: coverage.xml
 
+test:python:
+  only:
+    variables:
+      - $LEGACY_TEST == "true"
 
 # Publish to docker-hub
 publish:docker:
