@@ -107,3 +107,8 @@ class Curator(FileCurator):
             )
 
 ```
+
+## Contributing
+
+### Testing
+Currently the only test specific to this repository is in tests/integration and performs an integration test to a flywheel instance.  In order to run this test, the environmental variable `api_key` should be set with your API key, and the GROUP, PROJECT, OUTPUT and test CURATOR variables should be set accordingly.  The test will skip if `api_key` is not available.
