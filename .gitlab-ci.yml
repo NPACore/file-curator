@@ -58,7 +58,7 @@ pre:format:
    - '[ $BLACK = "true" ] && poetry black $BLACK_ARGS $CI_PROJECT_DIR'
 
 pre:deps:
-  extends: .python-geras
+  extends: .python-gears
   stage: pre
   script:
     - poetry export -f requirements.txt --without-hashes > requirements.txt
