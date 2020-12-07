@@ -1,0 +1,152 @@
+include:
+  - project: flywheel-io/infrastructure/ci-templates
+    ref: master
+    file: python3.yml
+  - project: flywheel-io/infrastructure/ci-templates
+    ref: master
+    file: docker-dind.yml
+
+stages:
+    - pre
+    - build
+    - test
+    - publish
+    #- tag # disable tag stage for now
+# The tag stage is a pretty clever little job.  When:
+#   * A push is made to master or a branch starting with 'hotfix-'
+#   * The commit message contains 'release'
+#   * And the pyproject.toml has been changed
+# The CI script will create a tag with the version from the pyproject.toml and push, 
+# thus triggering the publish script
+
+variables:
+  PYTHON_VERSION: '3.7'
+  PACKAGE_DIR: flywheel_gear_toolkit/
+  PYLINT: "false"
+  PYCODESTYLE: "false"
+  BLACK: "true"
+  PYPI: "true"
+  PIP_EXTRA: "[dev]"
+  DOC: "true"
+  POETRY: "true"
+  PYTEST_COVERAGE: "false"
+  CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+
+.python-gears:
+  extends: .python
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache
+      - .venv
+  before_script:
+    # Install the docker binaries so we can use the dind service from gitlab
+    - export PATH="$PATH:$PYTHONUSERBASE/bin"
+    - mkdir -p .cache/user-site/
+    - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+    - source $HOME/.poetry/env
+    # install and cache poetry project and dependencies in .venv
+    - export POETRY_VIRTUALENVS_CREATE=true
+    - export POETRY_VIRTUALENVS_IN_PROJECT=true
+    - poetry install
+
+pre:format:
+  extends: .python
+  stage: pre
+  script:
+   - '[ $ISORT = "true" ] && poetry run isort $CI_PROJECT_DIR'
+   - '[ $BLACK = "true" ] && poetry black $BLACK_ARGS $CI_PROJECT_DIR'
+
+pre:deps:
+  extends: .python
+  stage: pre
+  script:
+    - poetry export -f requirements.txt --without-hashes > requirements.txt
+    - poetry export -f requirements.txt --dev --without-hashes > tests/requirements.txt
+
+build:
+  stage: build
+  extends: .docker-dind
+  before_script:
+    - apk add jq
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # Need -r (raw) so that value doesn't print strings
+    - export VERSION=$(cat manifest.json | jq -r '.version')
+  script:
+    - export BUILDKIT=1
+    - |
+      docker build \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --cache-from $CI_REGISTRY_IMAGE:latest \
+        --tag $CI_REGISTRY_IMAGE:$VERSION \
+        --tag $CI_REGISTRY_IMAGE:latest -f Dockerfile .
+    - |
+      docker build \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --cache-from $CI_REGISTRY_IMAGE:latest-test \
+        --build-arg BASE=$CI_REGISTRY_IMAGE:latest \
+        --tag $CI_REGISTRY_IMAGE:$VERSION-test \
+        --tag $CI_REGISTRY_IMAGE:latest-test -f tests/Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:$VERSION
+    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$VERSION-test
+    - docker push $CI_REGISTRY_IMAGE:latest-test
+
+
+test:unit:
+  image: $CI_REGISTRY_IMAGE:latest-test
+  stage: test
+  only:
+    variables:
+      - $PYTEST == "true"
+  script:
+    - |
+      if [ $PYTEST_COVERAGE = "true" ]; then
+        export PYTEST_ARGS="${PYTEST_ARGS} --cov=${PACKAGE_DIR}"
+      fi
+    - '[ $PYTEST = "true" ] && python3 -m pytest $PYTEST_ARGS $TESTDIR'
+    - |
+      if [ $PYTEST_COVERAGE = "true" ]; then
+        python3 -m coverage xml
+      fi
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+
+
+# Publish to docker-hub
+publish:docker:
+  stage: publish
+  extends: .docker-dind
+  only:
+    refs:
+      - tags
+  before_script:
+    - apk add --no-cache git
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - export BUILDKIT=1
+    - echo ${BUILD_TIME:=$(date --utc +%FT%TZ)}
+    - echo ${LATEST_VER:=$(git describe --abbrev=0 --tags || :)}
+    - |
+      docker build \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        -t "${DOCKER_IMAGE}:latest" \
+        -t "${DOCKER_IMAGE}:${KEY_COMMIT}" \
+        -t "${DOCKER_IMAGE}:${CI_COMMIT_REF_NAME}" \
+        - <<EOF
+      FROM ${CI_REGISTRY_IMAGE}:latest
+      ENV BUILD_TIME=${BUILD_TIME}
+      ENV COMMIT_REF=${CI_COMMIT_REF_NAME}
+      ENV COMMIT_SHA=${CI_COMMIT_SHORT_SHA}
+      ENV LATEST_VER=${LATEST_VER}
+      EOF
+    - if [ -f "$TEST_DOCKER_SH" ]; then
+        $TEST_DOCKER_SH;
+      fi
+    - docker login -u "$DOCKER_CI_USER" -p "$DOCKER_CI_PASS"
+    - docker push "${DOCKER_IMAGE}:${KEY_COMMIT}"
+    - docker push "${DOCKER_IMAGE}:${CI_COMMIT_REF_NAME}"
+    - test "${CI_COMMIT_REF_NAME}" = master && docker push "${DOCKER_IMAGE}:latest" || true
+ 
+
