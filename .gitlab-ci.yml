@@ -30,6 +30,7 @@ variables:
   POETRY: "true"
   PYTEST_COVERAGE: "false"
   CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+  TESTDIR: "tests"
 
 .python-gears:
   extends: .python
@@ -112,9 +113,9 @@ test:unit:
       if [ $PYTEST_COVERAGE = "true" ]; then
         python3 -m coverage xml
       fi
-  artifacts:
-    reports:
-      cobertura: coverage.xml
+  #artifacts:
+  #  reports:
+  #    cobertura: coverage.xml
 
 test:python:
   only:
