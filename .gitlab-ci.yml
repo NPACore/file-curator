@@ -55,10 +55,6 @@ pre:format:
   script:
    - '[ $ISORT = "true" ] && poetry run isort $CI_PROJECT_DIR'
    - '[ $BLACK = "true" ] && poetry run black $BLACK_ARGS $CI_PROJECT_DIR'
-  artifacts:
-    paths:
-      - requirements.txt
-      - tests/requirements.txt
 
 pre:deps:
   extends: .python-gears
@@ -66,6 +62,10 @@ pre:deps:
   script:
     - poetry export -f requirements.txt --without-hashes > requirements.txt
     - poetry export -f requirements.txt --dev --without-hashes > tests/requirements.txt
+  artifacts:
+    paths:
+      - requirements.txt
+      - tests/requirements.txt
 
 build:
   stage: build
