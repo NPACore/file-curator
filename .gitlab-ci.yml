@@ -21,14 +21,14 @@ stages:
 
 variables:
   PYTHON_VERSION: '3.8'
-  PACKAGE_DIR: flywheel_gear_toolkit/
+  PACKAGE_DIR: "$CI_PROJECT_DIR"
   BLACK: "true"
   PYPI: "true"
   LEGACY_TEST: "false"
   PIP_EXTRA: "[dev]"
   DOC: "false"
   POETRY: "true"
-  PYTEST_COVERAGE: "false"
+  PYTEST_COVERAGE: "true"
   CACHE_DIR: "$CI_PROJECT_DIR/.cache"
   TESTDIR: "tests"
 
@@ -113,9 +113,9 @@ test:unit:
       if [ $PYTEST_COVERAGE = "true" ]; then
         python3 -m coverage xml
       fi
-  #artifacts:
-  #  reports:
-  #    cobertura: coverage.xml
+  artifacts:
+    reports:
+      cobertura: coverage.xml
 
 test:python:
   only:
