@@ -1,20 +1,19 @@
 # File Curator
-File curator is a utility gear that performs a user provided custom curation on a single file.
+File curator is a utility gear that performs a user provided custom curation script on a single file.
 
-The primary usage of File Curator will be for gear rules.
 
 ## Usage
 
 ### Inputs
 
-* __curator__: File container implementation of custom curator class, see below
-* __file-input__: File to perform the curation on
+* __curator__: File container implementation of custom curator class, see below.
+* __file-input__: File to curate.
 * __additional-input-one__, __additional-input-two__, __additional-input-three__: Optional additional inputs to be provided.  For example a CSV of data could be passed in that the curator checks against in order to properly classify a file.
-* __optional-requirements__: Optional requirements.txt file which will be programatically installed at gear run time
 
 ### Configuration
-* __write-report__ (boolean, default False): Whether or not to upload a report of the actions taken.
-* __verbose__ (boolean, default False): Include debug statements in output
+* __debug__ (boolean, default False): Include debug statements in output.
+
+## Customization
 
 ### Extending the custom curator class
 
@@ -22,7 +21,7 @@ The `FileCurator` class is provided in the [flywheel_gear_toolkit](https://gear-
 
 This class should be extended in order to define a custom curation script.
 
-Example `curate.py` script which could be passed into the __curator__ input
+Example `curate.py` script which could be passed as the __curator__ input.  This example script trivially sets the file classification 'Measurement' key to 'T1'
 
 ```python
 import logging
@@ -41,17 +40,10 @@ class Curator(FileCurator):
         # Set gear context, and read only flywheel Client in parent constructor
         super().__init__(**kwargs)
 
-        self.reporter = None
-        # If write_report option is passed in, set up a reporter
-        if self.write_report:
-            log.info("Initiating reporter")
-            self.reporter = AggregatedReporter(
-                output_path=(Path(self.context.output_dir) / "test.csv")
-            )
-
-    # Extend curate_file.  The input file will be passed into this method
+    # Define curate_file.  The input file will be passed into this method
     def curate_file(self, file_: Dict[str, Any]):
-        """
+        """Sets file measurement to T1.
+
          file_ format defined here: https://gitlab.com/flywheel-io/public/gears/-/tree/master/spec#the-input-configuration
         
         file_ : {
@@ -84,12 +76,11 @@ class Curator(FileCurator):
 
         # update classification
         if file_.get('object').get('type') == 'dicom':
-            file_metadata['classification'] = 'T1'
-            
-        if self.reporter:
-            self.reporter.append_log(
-                container_type="file", label=label, msg='updated classification'
-            )
+            file_metadata['classification'] = {
+                'Measurement':['T1']
+            }
+        # Specify which file to update by passing in file name
+        file_metadata['name'] = label
 
         #output metadata: https://gitlab.com/flywheel-io/public/gears/-/tree/master/spec#output-metadata
         metadata = {
@@ -101,14 +92,26 @@ class Curator(FileCurator):
         with open(outfile,'w') as out:
             json.dump(metadata, out)
 
-        if self.reporter:
-            self.reporter.append_log(
-                container_type="file", label=label, msg='wrote_metadata'
-            )
-
+        log.info('Wrote metadata')
 ```
 
-## Contributing
+### Adding extra dependencies
+The file-curator gear comes with the following python packages installed:
+* lxml
+* pandas
+* nibabel
+* Pillow
+* piexif
+* pydicom
+* pypng
+* flywheel-gear-toolkit
+__Note__: See package versions in [./pyproject.toml](pyproject.toml)
 
-### Testing
-Currently the only test specific to this repository is in tests/integration and performs an integration test to a flywheel instance.  In order to run this test, the environmental variable `api_key` should be set with your API key, and the GROUP, PROJECT, OUTPUT and test CURATOR variables should be set accordingly.  The test will skip if `api_key` is not available.
+If you need other dependencies that aren't installed by default.  The gear-toolkit provides an interface to programatically install dependencies.  You can specify a `requirements.txt` file as one of the additional inputs then install them your `Curator.__init__` method:
+```python
+from flywheel_gear_toolkit.utils import install_requirements
+...
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        install_requirements(self.additional_input_one)
+```
