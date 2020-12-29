@@ -26,11 +26,6 @@
         ]
       }
     },
-    "optional-requirements": {
-      "base": "file",
-      "description": "Optional requirements.txt to install",
-      "optional": true
-    },
     "file-input": {
       "base": "file",
       "description": "File to curate"
@@ -47,12 +42,7 @@
     }
   },
   "config": {
-    "write_report": {
-      "description": "Create output CSV report of curated elements.",
-      "type": "boolean",
-      "default": false
-    },
-    "verbose": {
+    "debug": {
       "description": "Log debug messages",
       "type": "boolean",
       "default": false
