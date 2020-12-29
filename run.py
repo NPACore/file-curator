@@ -4,8 +4,8 @@ import parser
 
 import flywheel
 from flywheel_gear_toolkit import GearToolkitContext
-from flywheel_gear_toolkit.utils import datatypes, install_requirements
-from flywheel_gear_toolkit.utils import get_curator
+from flywheel_gear_toolkit.utils import datatypes
+from flywheel_gear_toolkit.utils.curator import get_curator
 
 log = logging.getLogger(__name__)
 
