@@ -8,7 +8,7 @@ import flywheel
 import pytest
 from flywheel_gear_toolkit import GearToolkitContext
 from flywheel_gear_toolkit.utils import datatypes, install_requirements
-from flywheel_gear_toolkit.utils.curater import get_curator
+from flywheel_gear_toolkit.utils.curator import get_curator
 
 import run
 
