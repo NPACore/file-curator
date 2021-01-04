@@ -1,5 +1,5 @@
 include:
-  - project: flywheel-io/flywheel-apps/ci-templates
+  - project: flywheel-io/flywheel-apps/utils/ci-templates
     ref: master
     file: main.yml
 

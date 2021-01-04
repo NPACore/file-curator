@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    - id: check-json
+    - id: pretty-format-json
+
+  - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
+    rev: master
+    hooks:
+    - id: isort-poetry
+    - id: black-poetry
+    - id: pylint-poetry
+    - id: pycodestyle-poetry
+    - id: pydocstyle-poetry
+    - id: pytest-poetry
+
