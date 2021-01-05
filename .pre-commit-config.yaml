@@ -10,8 +10,8 @@ repos:
     hooks:
     - id: isort-poetry
     - id: black-poetry
-    - id: pylint-poetry
-    - id: pycodestyle-poetry
-    - id: pydocstyle-poetry
+      #- id: pylint-poetry
+      #- id: pycodestyle-poetry
+      # - id: pydocstyle-poetry
     - id: pytest-poetry
 
