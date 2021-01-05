@@ -28,7 +28,7 @@ def test_file_curator(mocker):
     file = {"location": {"name": proj.files[0].name}}
 
     parser_mock = mocker.patch("run.parser.parse_config")
-    parser_mock.return_value = (str(CURATOR), file, {}, None)
+    parser_mock.return_value = (str(CURATOR), file, {})
 
     gear_context = MagicMock(spec=GearToolkitContext)
     gear_context.output_dir = OUTPUT
