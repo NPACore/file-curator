@@ -6,7 +6,7 @@ File curator is a utility gear that performs a user provided custom curation scr
 
 ### Inputs
 
-* __curator__: File container implementation of custom curator class, see below.
+* __curator__: A python script implementing a FileCurator class. See below.
 * __file-input__: File to curate.
 * __additional-input-one__, __additional-input-two__, __additional-input-three__: Optional additional inputs to be provided.  For example a CSV of data could be passed in that the curator checks against in order to properly classify a file.
 
@@ -107,7 +107,9 @@ The file-curator gear comes with the following python packages installed:
 * flywheel-gear-toolkit
 __Note__: See package versions in [./pyproject.toml](pyproject.toml)
 
-If you need other dependencies that aren't installed by default.  The gear-toolkit provides an interface to programatically install dependencies.  You can specify a `requirements.txt` file as one of the additional inputs then install them your `Curator.__init__` method:
+If you need other dependencies that aren't installed by default.  The gear-toolkit provides 
+an interface to programmatically install dependencies.  You can specify a `requirements.txt` 
+file as one of the additional inputs then install them your `Curator.__init__` method:
 ```python
 from flywheel_gear_toolkit.utils import install_requirements
 ...
