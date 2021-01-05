@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import logging
 import os
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -7,8 +6,6 @@ from unittest.mock import MagicMock
 import flywheel
 import pytest
 from flywheel_gear_toolkit import GearToolkitContext
-from flywheel_gear_toolkit.utils import datatypes, install_requirements
-from flywheel_gear_toolkit.utils.curator import get_curator
 
 import run
 

@@ -1,8 +1,6 @@
 from parser import parse_config
 from unittest.mock import MagicMock
 
-import flywheel
-import pytest
 from flywheel_gear_toolkit import GearToolkitContext
 
 
