@@ -13,7 +13,7 @@ def parse_config(
         gear_context (GearToolkitContext):
 
     Returns:
-        Tuple[str, str, Dict[str, Optional[str]], Optional[str]]: 
+        Tuple[str, str, Dict[str, Optional[str]], Optional[str]]:
             tuple containing:
                 - (str) path to curator
                 - (Dict[str,Any]) input file
@@ -29,4 +29,4 @@ def parse_config(
         "additional_input_one": input_file_one,
         "additional_input_two": input_file_two,
     }
-    return curator_path, file_input, input_files 
+    return curator_path, file_input, input_files

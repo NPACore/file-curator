@@ -15,13 +15,13 @@ def curate(
     file_input: flywheel.FileEntry,
     curator_path: datatypes.PathLike,
     **kwargs,
-) -> None: # pragma: no cover
+) -> None:  # pragma: no cover
     curator = get_curator(context, curator_path, **kwargs)
 
     curator.curate_container(file_input)
 
 
-def main(gear_context: GearToolkitContext) -> None: # pragma: no cover
+def main(gear_context: GearToolkitContext) -> None:  # pragma: no cover
     (
         curator_path,
         file_input,
@@ -38,7 +38,7 @@ def main(gear_context: GearToolkitContext) -> None: # pragma: no cover
     )
 
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     with GearToolkitContext() as gear_context:
         gear_context.init_logging()
         main(gear_context)

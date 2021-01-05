@@ -2,9 +2,9 @@ import json
 import logging
 import os
 import random
-from typing import Dict, Any
 import zipfile
 from pathlib import Path
+from typing import Any, Dict
 
 import flywheel
 import pydicom
@@ -37,23 +37,25 @@ class Curator(FileCurator):
             z_read.extractall(path=str(work))
 
         with zipfile.ZipFile(str(f_write_path), "w") as z_write:
-            for dcm_path in Path(self.context.work_dir).glob('*'):
+            for dcm_path in Path(self.context.work_dir).glob("*"):
                 if dcm_path.is_file():
                     try:
                         dcm = pydicom.dcmread(str(dcm_path))
                         # Randomly adjust patient weight for deidentify (Adding "jitter")
                         setattr(
                             dcm,
-                            "PatientWeight", (
+                            "PatientWeight",
+                            (
                                 (
                                     dcm.get("PatientWeight")
                                     if dcm.get("PatientWeight")
                                     else 50
-                                ) + random.randint(-10, 10)
+                                )
+                                + random.randint(-10, 10)
                             ),
                         )
                         dcm.save_as(str(dcm_path))
-                        z_write.write(str(dcm_path),arcname=(dcm_path.name))
+                        z_write.write(str(dcm_path), arcname=(dcm_path.name))
                     except Exception as e:
                         if self.reporter:
                             self.reporter.append_log(
