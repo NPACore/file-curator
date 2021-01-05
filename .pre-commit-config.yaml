@@ -4,6 +4,7 @@ repos:
     hooks:
     - id: check-json
     - id: pretty-format-json
+      args: ["--autofix"]
 
   - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
     rev: 2e18990c11ae5bf07623a5cfe5d53894f756bc0b
