@@ -5,6 +5,8 @@ repos:
     - id: check-json
     - id: pretty-format-json
       args: ["--indent=2","--no-sort-keys"]
+    - id: no-commit-to-branch
+      args: ["--branch","master"]
 
   - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
     rev: 2e18990c11ae5bf07623a5cfe5d53894f756bc0b
