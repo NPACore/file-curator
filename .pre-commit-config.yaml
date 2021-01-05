@@ -3,6 +3,7 @@ repos:
     rev: v3.4.0
     hooks:
     - id: check-json
+    - id: check-toml
     - id: pretty-format-json
       args: ["--indent=2","--no-sort-keys"]
     - id: no-commit-to-branch
