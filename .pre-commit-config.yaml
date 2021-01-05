@@ -6,7 +6,7 @@ repos:
     - id: pretty-format-json
 
   - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
-    rev: master
+    rev: 2e18990c11ae5bf07623a5cfe5d53894f756bc0b
     hooks:
     - id: isort-poetry
     - id: black-poetry

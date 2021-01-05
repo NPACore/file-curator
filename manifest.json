@@ -1,18 +1,36 @@
 {
-  "name": "file-curator",
-  "label": "File Curator",
-  "description": "Curates a given file, to be used as a gear rule",
-  "version": "0.1.0",
+  "author": "Flywheel",
+  "cite": "",
+  "command": "poetry run python run.py",
+  "config": {
+    "debug": {
+      "default": false,
+      "description": "Log debug messages",
+      "type": "boolean"
+    }
+  },
   "custom": {
+    "flywheel": {
+      "suite": "Curation"
+    },
     "gear-builder": {
       "category": "converter",
       "image": "flywheel/file-curator:0.1.0"
-    },
-    "flywheel": {
-      "suite": "Curation"
     }
   },
+  "description": "Curates a given file, to be used as a gear rule",
+  "environment": {},
   "inputs": {
+    "additional-input-one": {
+      "base": "file",
+      "description": "An optional input for curation.",
+      "optional": true
+    },
+    "additional-input-two": {
+      "base": "file",
+      "description": "An optional input for curation.",
+      "optional": true
+    },
     "api-key": {
       "base": "api-key",
       "read-only": true
@@ -29,31 +47,13 @@
     "file-input": {
       "base": "file",
       "description": "File to curate"
-    },
-    "additional-input-one": {
-      "base": "file",
-      "description": "An optional input for curation.",
-      "optional": true
-    },
-    "additional-input-two": {
-      "base": "file",
-      "description": "An optional input for curation.",
-      "optional": true
     }
   },
-  "config": {
-    "debug": {
-      "description": "Log debug messages",
-      "type": "boolean",
-      "default": false
-    }
-  },
-  "environment": {},
-  "command": "poetry run python run.py",
-  "author": "Flywheel",
-  "maintainer": "Flywheel <support@flywheel.io>",
-  "cite": "",
+  "label": "File Curator",
   "license": "MIT",
+  "maintainer": "Flywheel <support@flywheel.io>",
+  "name": "file-curator",
   "source": "https://github.com/flywheel-apps/custom-curator",
-  "url": "https://github.com/flywheel-apps/custom-curator"
+  "url": "https://github.com/flywheel-apps/custom-curator",
+  "version": "0.1.0"
 }
