@@ -49,7 +49,7 @@
     }
   },
   "environment": {},
-  "command": "./run.py",
+  "command": "poetry run python run.py",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
   "cite": "",
