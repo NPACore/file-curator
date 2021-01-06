@@ -53,7 +53,7 @@
   "license": "MIT",
   "maintainer": "Flywheel <support@flywheel.io>",
   "name": "file-curator",
-  "source": "https://github.com/flywheel-apps/custom-curator",
-  "url": "https://github.com/flywheel-apps/custom-curator",
+  "source": "https://gitlab.com/flywheel-io/flywheel-apps/file-curator",
+  "url": "https://gitlab.com/flywheel-io/flywheel-apps/file-curator",
   "version": "0.1.0"
 }
