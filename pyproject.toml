@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flywheel-file-curator"
-version = "0.1.0"
+version = "0.1.1"
 description = "Curate a given file, to be used as a gear rule\u001b"
 readme = "README.md"
 authors = ["Flywheel <support@flywheel.io>"]
