@@ -17,3 +17,4 @@ repos:
       - id: isort
       - id: black
       - id: pytest
+      - id: validate-manifest
