@@ -16,5 +16,5 @@ repos:
     hooks:
       - id: isort
       - id: black
-      - id: pytest
       - id: validate-manifest
+      - id: pytest
