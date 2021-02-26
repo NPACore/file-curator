@@ -1,7 +1,8 @@
-from parser import parse_config
 from unittest.mock import MagicMock
 
 from flywheel_gear_toolkit import GearToolkitContext
+
+from fw_gear_file_curator.parser import parse_config
 
 
 def test_parse_config():

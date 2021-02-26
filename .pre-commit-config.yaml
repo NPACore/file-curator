@@ -1,21 +1,19 @@
 repos:
+  # Hooks for non python files
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: master
     hooks:
     - id: check-json
     - id: check-toml
     - id: pretty-format-json
-      args: ["--indent=2","--no-sort-keys"]
+      args: ["--indent=2","--no-sort-keys","--autofix"]
     - id: no-commit-to-branch
       args: ["--branch","master"]
 
+  # python related hooks
   - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
-    rev: 2e18990c11ae5bf07623a5cfe5d53894f756bc0b
+    rev: master
     hooks:
-    - id: isort-poetry
-    - id: black-poetry
-      #- id: pylint-poetry
-      #- id: pycodestyle-poetry
-      # - id: pydocstyle-poetry
-    - id: pytest-poetry
-
+      - id: isort
+      - id: black
+      - id: pytest
