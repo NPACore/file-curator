@@ -1,7 +1,15 @@
-# Cache
-__pycache__
-.pytest_cache
-
-# Coverage
+# Python stuff
+*.egg-info
 .coverage
+__pycache__
+coverage.xml
+.coverage
+cov.xml
+dist
+junit.xml
 
+# Mac stuff
+.DS_Store
+
+# Editor specific stuff
+.vscode

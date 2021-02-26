@@ -7,11 +7,11 @@ WORKDIR ${FLYWHEEL}
 RUN apt-get update && apt-get install -y git && \ 
     pip install "poetry==1.1.2"
 
-COPY pyproject.toml poetry.lock ./
+# README.md required by poetry install
+COPY pyproject.toml poetry.lock run.py manifest.json README.md $FLYWHEEL/
+COPY fw_gear_file_curator $FLYWHEEL/fw_gear_file_curator
+
 RUN poetry install --no-dev
-
-COPY run.py manifest.json parser.py $FLYWHEEL/
-
 
 # Configure entrypoint
 RUN chmod a+x $FLYWHEEL/run.py
