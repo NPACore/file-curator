@@ -11,7 +11,8 @@ File curator is a utility gear that performs a user provided custom curation scr
 * __additional-input-one__, __additional-input-two__, __additional-input-three__: Optional additional inputs to be provided.  For example a CSV of data could be passed in that the curator checks against in order to properly classify a file.
 
 ### Configuration
-* __debug__ (boolean, default False): Include debug statements in output.
+* __debug__ (boolean, default `False`): Include debug statements in output.
+* __tag__ (string, default `""`): The tag to be added on input file upon run completion. 
 
 ## Customization
 

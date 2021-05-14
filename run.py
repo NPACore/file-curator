@@ -22,24 +22,32 @@ def curate(
     curator.curate_container(file_input)
 
 
-def main(gear_context: GearToolkitContext) -> None:  # pragma: no cover
+def main(context: GearToolkitContext) -> None:  # pragma: no cover
     (
         curator_path,
         file_input,
         optional_inputs,
-    ) = parser.parse_config(gear_context)
+    ) = parser.parse_config(context)
 
-    log.info(f"Curating {file_input.get('location').get('name')}")
+    input_filename = file_input.get("location").get("name")
+    log.info(f"Curating {input_filename}")
 
     curate(
-        gear_context,
+        context,
         file_input,
         curator_path,
         **optional_inputs,
     )
 
+    # update input file tag
+    tag = context.config.get("tag")
+    if tag:
+        tags = context.get_input("file-input")["object"]["tags"][:]  # copy
+        tags.append(tag)
+        context.update_file_metadata(input_filename, tags=tags)
+
 
 if __name__ == "__main__":  # pragma: no cover
-    with GearToolkitContext() as gear_context:
-        gear_context.init_logging()
-        main(gear_context)
+    with GearToolkitContext() as context:
+        context.init_logging()
+        main(context)
