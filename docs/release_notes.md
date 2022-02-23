@@ -4,7 +4,11 @@
 
 __Enhancements__:
 
-* Update inputs order in manifest
+* Update inputs order in manifest to be more natural (file-input first).
+
+__Maintenance__:
+
+* Bump flywheel-gear-toolkit dependency.
 
 ## 0.2.0
 
