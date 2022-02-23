@@ -62,6 +62,25 @@ colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
+name = "certifi"
+version = "2021.10.8"
+description = "Python package for providing Mozilla's CA Bundle."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "charset-normalizer"
+version = "2.0.12"
+description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
+category = "main"
+optional = false
+python-versions = ">=3.5.0"
+
+[package.extras]
+unicode_backport = ["unicodedata2"]
+
+[[package]]
 name = "click"
 version = "8.0.4"
 description = "Composable command line interface toolkit"
@@ -106,6 +125,21 @@ python-versions = "*"
 setuptools_scm = "*"
 
 [[package]]
+name = "flywheel-bids"
+version = "0.9.4"
+description = "Flywheel BIDS Client"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flywheel-sdk = ">=14.6.3"
+future = ">=0.18.2"
+jsonschema = ">=3.2.0"
+rtstatlib = ">=1.0.0"
+urllib3 = ">=1.26.4"
+
+[[package]]
 name = "flywheel-gear-toolkit"
 version = "0.5.9"
 description = "Tooling for developing Flywheel gears"
@@ -116,7 +150,9 @@ python-versions = ">=3.7,<4.0"
 [package.dependencies]
 "backports.zoneinfo" = {version = ">=0.2.1,<0.3.0", markers = "python_version == \"3.8\""}
 dotty-dict = ">=1.2.1,<2.0.0"
+flywheel-bids = {version = ">=0.9.1,<0.10.0", optional = true, markers = "extra == \"all\" or extra == \"sdk\""}
 flywheel-gears = ">=0.2,<0.3"
+flywheel-sdk = {version = ">=14.2.0", optional = true, markers = "extra == \"all\" or extra == \"sdk\""}
 fw-meta = ">=2,<3"
 jsonschema = ">=3.2.0,<4.0.0"
 pathvalidate = ">=2.5.0,<3.0.0"
@@ -143,6 +179,30 @@ jsonschema = ">=2.5.1"
 rfc3987 = ">=1.3.7"
 
 [[package]]
+name = "flywheel-sdk"
+version = "16.0.0"
+description = "Flywheel SDK"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+certifi = "*"
+python-dateutil = "*"
+requests = ">=2.18.4"
+requests-toolbelt = "*"
+six = ">=1.10"
+urllib3 = ">=1.15"
+
+[[package]]
+name = "future"
+version = "0.18.2"
+description = "Clean single-source support for Python 3 and 2"
+category = "main"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
 name = "fw-meta"
 version = "2.0.5"
 description = "Flywheel metadata extraction."
@@ -167,6 +227,14 @@ python-versions = ">=3.7,<4.0"
 python-dateutil = ">=2.8.2,<3.0.0"
 tzdata = ">=2021.5,<2022.0"
 tzlocal = ">=4.1,<5.0"
+
+[[package]]
+name = "idna"
+version = "3.3"
+description = "Internationalized Domain Names in Applications (IDNA)"
+category = "main"
+optional = false
+python-versions = ">=3.5"
 
 [[package]]
 name = "iniconfig"
@@ -488,12 +556,49 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "requests"
+version = "2.27.1"
+description = "Python HTTP for Humans."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+
+[package.dependencies]
+certifi = ">=2017.4.17"
+charset-normalizer = {version = ">=2.0.0,<2.1.0", markers = "python_version >= \"3\""}
+idna = {version = ">=2.5,<4", markers = "python_version >= \"3\""}
+urllib3 = ">=1.21.1,<1.27"
+
+[package.extras]
+socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
+use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
+
+[[package]]
+name = "requests-toolbelt"
+version = "0.9.1"
+description = "A utility belt for advanced users of python-requests"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+requests = ">=2.0.1,<3.0.0"
+
+[[package]]
 name = "rfc3987"
 version = "1.3.8"
 description = "Parsing and validation of URIs (RFC 3986) and IRIs (RFC 3987)"
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "rtstatlib"
+version = "1.0.0"
+description = "Runtime Status Library"
+category = "main"
+optional = false
+python-versions = ">=3.0"
 
 [[package]]
 name = "setuptools-scm"
@@ -576,10 +681,23 @@ tzdata = {version = "*", markers = "platform_system == \"Windows\""}
 devenv = ["black", "pyroma", "pytest-cov", "zest.releaser"]
 test = ["pytest-mock (>=3.3)", "pytest (>=4.3)"]
 
+[[package]]
+name = "urllib3"
+version = "1.26.8"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
+
+[package.extras]
+brotli = ["brotlipy (>=0.6.0)"]
+secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
+socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "35ecc26582a2f5d3220b573359387c8200971004815453dfd0507496eb68faf9"
+content-hash = "460a1d20d6c3092e26375075e4f33b2571c4a6494901fa49352056657e795e8f"
 
 [metadata.files]
 appdirs = [
@@ -614,6 +732,14 @@ attrs = [
 ]
 black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
+]
+certifi = [
+    {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
+    {file = "certifi-2021.10.8.tar.gz", hash = "sha256:78884e7c1d4b00ce3cea67b44566851c4343c120abd683433ce934a68ea58872"},
+]
+charset-normalizer = [
+    {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
+    {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
 ]
 click = [
     {file = "click-8.0.4-py3-none-any.whl", hash = "sha256:6a7a62563bbfabfda3a38f3023a1db4a35978c0abd76f6c9605ecd6554d6d9b1"},
@@ -680,17 +806,30 @@ coverage = [
 dotty-dict = [
     {file = "dotty_dict-1.3.0.tar.gz", hash = "sha256:eb0035a3629ecd84397a68f1f42f1e94abd1c34577a19cd3eacad331ee7cbaf0"},
 ]
+flywheel-bids = [
+    {file = "flywheel_bids-0.9.4-py2.py3-none-any.whl", hash = "sha256:b5ab4f18a73315f1853eaa660b12c291b5f3c59e123199319e4bbcde65c57f23"},
+]
 flywheel-gear-toolkit = [
     {file = "flywheel_gear_toolkit-0.5.9-py3-none-any.whl", hash = "sha256:7f0f5d7cf74f373ecf8f051e74dd97a3517dc9e17070d7269952002c172cb8a1"},
 ]
 flywheel-gears = [
     {file = "flywheel_gears-0.2.1-py2.py3-none-any.whl", hash = "sha256:8f09880c8227c469be5e7e7a2977cb136b2a40565a0b91e6be5be33e8df32f24"},
 ]
+flywheel-sdk = [
+    {file = "flywheel_sdk-16.0.0-py2.py3-none-any.whl", hash = "sha256:5a678793d3028f3a5f90070193cae48177607c1b228ad14d8c940986749e1bc3"},
+]
+future = [
+    {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
+]
 fw-meta = [
     {file = "fw_meta-2.0.5-py3-none-any.whl", hash = "sha256:30f5a1f850de375a74a444f3f26986ede0eeb290c245e6b6e341461a3f91e797"},
 ]
 fw-utils = [
     {file = "fw_utils-2.0.7-py3-none-any.whl", hash = "sha256:71084a8b570cd6d1b3c5c1c460a7872f1062b4fd123359a2f5f51df1eed0fac2"},
+]
+idna = [
+    {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
+    {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -1057,9 +1196,21 @@ regex = [
     {file = "regex-2022.1.18-cp39-cp39-win_amd64.whl", hash = "sha256:ebaeb93f90c0903233b11ce913a7cb8f6ee069158406e056f884854c737d2442"},
     {file = "regex-2022.1.18.tar.gz", hash = "sha256:97f32dc03a8054a4c4a5ab5d761ed4861e828b2c200febd4e46857069a483916"},
 ]
+requests = [
+    {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
+    {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
+]
+requests-toolbelt = [
+    {file = "requests-toolbelt-0.9.1.tar.gz", hash = "sha256:968089d4584ad4ad7c171454f0a5c6dac23971e9472521ea3b6d49d610aa6fc0"},
+    {file = "requests_toolbelt-0.9.1-py2.py3-none-any.whl", hash = "sha256:380606e1d10dc85c3bd47bf5a6095f815ec007be7a8b69c878507068df059e6f"},
+]
 rfc3987 = [
     {file = "rfc3987-1.3.8-py2.py3-none-any.whl", hash = "sha256:10702b1e51e5658843460b189b185c0366d2cf4cff716f13111b0ea9fd2dce53"},
     {file = "rfc3987-1.3.8.tar.gz", hash = "sha256:d3c4d257a560d544e9826b38bc81db676890c79ab9d7ac92b39c7a253d5ca733"},
+]
+rtstatlib = [
+    {file = "rtstatlib-1.0.0-py3-none-any.whl", hash = "sha256:9646c871613fd968150c07572b7cabadb6431758d989c1bb6cc457b9bc66ba5a"},
+    {file = "rtstatlib-1.0.0.tar.gz", hash = "sha256:623aa762462ab767ce7108da30e22777786567379075b075fc17bdad9a024a7d"},
 ]
 setuptools-scm = [
     {file = "setuptools_scm-6.4.2-py3-none-any.whl", hash = "sha256:acea13255093849de7ccb11af9e1fb8bde7067783450cee9ef7a93139bddf6d4"},
@@ -1114,4 +1265,8 @@ tzdata = [
 tzlocal = [
     {file = "tzlocal-4.1-py3-none-any.whl", hash = "sha256:28ba8d9fcb6c9a782d6e0078b4f6627af1ea26aeaa32b4eab5324abc7df4149f"},
     {file = "tzlocal-4.1.tar.gz", hash = "sha256:0f28015ac68a5c067210400a9197fc5d36ba9bc3f8eaf1da3cbd59acdfed9e09"},
+]
+urllib3 = [
+    {file = "urllib3-1.26.8-py2.py3-none-any.whl", hash = "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed"},
+    {file = "urllib3-1.26.8.tar.gz", hash = "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"},
 ]
