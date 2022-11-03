@@ -3,16 +3,20 @@ FROM python:3.8-slim as base
 ENV FLYWHEEL="/flywheel/v0"
 WORKDIR ${FLYWHEEL}
 
-#DEV install git
-RUN apt-get update && apt-get install -y git && \ 
-    pip install "poetry==1.1.2"
+# Dev install. git for pip editable install.
+RUN apt-get update &&  \
+    apt-get install --no-install-recommends -y git=1:2.30.2-1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# README.md required by poetry install
-COPY pyproject.toml poetry.lock run.py manifest.json README.md $FLYWHEEL/
-COPY fw_gear_file_curator $FLYWHEEL/fw_gear_file_curator
+# Installing main dependencies
+COPY requirements.txt $FLYWHEEL/
+RUN pip install --no-cache-dir -r $FLYWHEEL/requirements.txt
 
-RUN poetry install --no-dev
+# Installing the current project (most likely to change, above layer can be cached)
+COPY ./ $FLYWHEEL/
+RUN pip install --no-cache-dir .
 
 # Configure entrypoint
 RUN chmod a+x $FLYWHEEL/run.py
-ENTRYPOINT ["poetry","run","python","/flywheel/v0/run.py"]
+ENTRYPOINT ["python","/flywheel/v0/run.py"]

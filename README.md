@@ -1,6 +1,7 @@
 # File Curator
-File curator is a utility gear that performs a user provided custom curation script on a single file.
 
+File curator is a utility gear that performs a user provided custom curation script on
+a single file.
 
 ## Usage
 
@@ -8,11 +9,14 @@ File curator is a utility gear that performs a user provided custom curation scr
 
 * __curator__: A python script implementing a FileCurator class. See below.
 * __file-input__: File to curate.
-* __additional-input-one__, __additional-input-two__, __additional-input-three__: Optional additional inputs to be provided.  For example a CSV of data could be passed in that the curator checks against in order to properly classify a file.
+* __additional-input-one__, __additional-input-two__, __additional-input-three__:
+  Optional additional inputs to be provided.  For example a CSV of data could be
+  passed in that the curator checks against in order to properly classify a file.
 
 ### Configuration
+
 * __debug__ (boolean, default `False`): Include debug statements in output.
-* __tag__ (string, default `""`): The tag to be added on input file upon run completion. 
+* __tag__ (string, default `""`): The tag to be added on input file upon run completion.
 
 ## Customization
 
@@ -22,7 +26,8 @@ The `FileCurator` class is provided in the [flywheel_gear_toolkit](https://gear-
 
 This class should be extended in order to define a custom curation script.
 
-Example `curate.py` script which could be passed as the __curator__ input.  This example script trivially sets the file classification 'Measurement' key to 'T1'
+Example `curate.py` script which could be passed as the __curator__ input.  This
+example script trivially sets the file classification 'Measurement' key to 'T1'
 
 ```python
 import logging
@@ -97,7 +102,9 @@ class Curator(FileCurator):
 ```
 
 ### Adding extra dependencies
+
 The file-curator gear comes with the following python packages installed:
+
 * lxml
 * pandas
 * nibabel
@@ -108,9 +115,10 @@ The file-curator gear comes with the following python packages installed:
 * flywheel-gear-toolkit
 __Note__: See package versions in [./pyproject.toml](pyproject.toml)
 
-If you need other dependencies that aren't installed by default.  The gear-toolkit provides 
-an interface to programmatically install dependencies.  You can specify a `requirements.txt` 
+If you need other dependencies that aren't installed by default.  The gear-toolkit provides
+an interface to programmatically install dependencies.  You can specify a `requirements.txt`
 file as one of the additional inputs then install them your `Curator.__init__` method:
+
 ```python
 from flywheel_gear_toolkit.utils import install_requirements
 ...

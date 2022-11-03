@@ -1,7 +1,7 @@
 include:
-  - project: flywheel-io/flywheel-apps/utils/ci-templates
-    ref: main
-    file: poetry-pre-commit.yml
+  - project: flywheel-io/scientific-solutions/etc/sse-qa-ci
+    ref: abcc755ed20488f117c3cf45a083d894430248ba
+    file: ci/default.yml
 
 variables:
-  PYPI: "false"
+  PYTEST_COV_FAIL_UNDER: 80

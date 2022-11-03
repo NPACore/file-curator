@@ -1,20 +1,15 @@
 repos:
-  # Hooks for non python files
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: master
+  - repo: https://gitlab.com/flywheel-io/tools/etc/qa-ci
+    rev: 3bef278834d93f56128d4174445bde0872f2dd54
     hooks:
-    - id: check-json
-    - id: check-toml
-    - id: pretty-format-json
-      args: ["--indent=2","--no-sort-keys","--autofix"]
-    - id: no-commit-to-branch
-      args: ["--branch","master"]
-
-  # python related hooks
-  - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
-    rev: master
-    hooks:
-      - id: isort
+      - id: poetry_export
+      - id: docker_build
+      - id: markdownlint
+      - id: yamllint
       - id: black
-      - id: validate-manifest
+      - id: isort
       - id: pytest
+  - repo: https://gitlab.com/flywheel-io/scientific-solutions/etc/sse-qa-ci
+    rev: abcc755ed20488f117c3cf45a083d894430248ba
+    hooks:
+      - id: validate-manifest
