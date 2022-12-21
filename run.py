@@ -42,9 +42,7 @@ def main(context: GearToolkitContext) -> None:  # pragma: no cover
     # update input file tag
     tag = context.config.get("tag")
     if tag:
-        tags = context.get_input("file-input")["object"]["tags"][:]  # copy
-        tags.append(tag)
-        context.update_file_metadata(input_filename, tags=tags)
+        context.metadata.add_file_tags(file_input, tags=tag)
 
 
 if __name__ == "__main__":  # pragma: no cover
