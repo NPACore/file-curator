@@ -1,76 +1,76 @@
 {
-    "author": "Flywheel",
-    "cite": "",
-    "command": "python run.py",
-    "config": {
-        "debug": {
-            "default": false,
-            "description": "Log debug messages",
-            "type": "boolean"
-        },
-        "tag": {
-            "default": "",
-            "description": "The tag to be added on input file upon run completion.",
-            "type": "string"
-        }
+  "author": "Flywheel",
+  "cite": "",
+  "command": "python run.py",
+  "config": {
+    "debug": {
+      "default": false,
+      "description": "Log debug messages",
+      "type": "boolean"
     },
-    "custom": {
-        "flywheel": {
-            "suite": "Curation"
-        },
-        "gear-builder": {
-            "category": "converter",
-            "image": "flywheel/file-curator:0.3.1"
-        }
+    "tag": {
+      "default": "",
+      "description": "The tag to be added on input file upon run completion.",
+      "type": "string"
+    }
+  },
+  "custom": {
+    "flywheel": {
+      "suite": "Curation"
     },
-    "description": "Curates a given file, to be used as a gear rule",
-    "environment": {
-        "PATH": "/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-        "LANG": "C.UTF-8",
-        "GPG_KEY": "E3FF2839C048B25C084DEBE9B26995E310250568",
-        "PYTHON_VERSION": "3.8.16",
-        "PYTHON_PIP_VERSION": "22.0.4",
-        "PYTHON_SETUPTOOLS_VERSION": "57.5.0",
-        "PYTHON_GET_PIP_URL": "https://github.com/pypa/get-pip/raw/66030fa03382b4914d4c4d0896961a0bdeeeb274/public/get-pip.py",
-        "PYTHON_GET_PIP_SHA256": "1e501cf004eac1b7eb1f97266d28f995ae835d30250bec7f8850562703067dc6",
-        "FLYWHEEL": "/flywheel/v0"
+    "gear-builder": {
+      "category": "converter",
+      "image": "flywheel/file-curator:0.4.0-rc0"
+    }
+  },
+  "description": "Curates a given file, to be used as a gear rule",
+  "environment": {
+    "PATH": "/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "LANG": "C.UTF-8",
+    "GPG_KEY": "E3FF2839C048B25C084DEBE9B26995E310250568",
+    "PYTHON_VERSION": "3.8.16",
+    "PYTHON_PIP_VERSION": "22.0.4",
+    "PYTHON_SETUPTOOLS_VERSION": "57.5.0",
+    "PYTHON_GET_PIP_URL": "https://github.com/pypa/get-pip/raw/1a96dc5acd0303c4700e02655aefd3bc68c78958/public/get-pip.py",
+    "PYTHON_GET_PIP_SHA256": "d1d09b0f9e745610657a528689ba3ea44a73bd19c60f4c954271b790c71c2653",
+    "FLYWHEEL": "/flywheel/v0",
+    "PWD": "/flywheel/v0"
+  },
+  "inputs": {
+    "file-input": {
+      "base": "file",
+      "description": "File to curate",
+      "optional": false
     },
-    "inputs": {
-        "file-input": {
-            "base": "file",
-            "description": "File to curate",
-            "optional": false
-        },
-        "curator": {
-            "base": "file",
-            "description": "A python implementation of the FileCurator class (see https://gear-toolkit.readthedocs.io/en/latest/utils.html#curator for more details).",
-            "optional": false,
-            "type": {
-                "enum": [
-                    "source code"
-                ]
-            }
-        },
-        "additional-input-one": {
-            "base": "file",
-            "description": "An optional input for curation.",
-            "optional": true
-        },
-        "additional-input-two": {
-            "base": "file",
-            "description": "An optional input for curation.",
-            "optional": true
-        },
-        "api-key": {
-            "base": "api-key",
-            "read-only": true
-        }
+    "curator": {
+      "base": "file",
+      "description": "A python implementation of the FileCurator class (see https://gear-toolkit.readthedocs.io/en/latest/utils.html#curator for more details).",
+      "optional": false,
+      "type": {
+        "enum": [
+          "source code"
+        ]
+      }
     },
-    "label": "File Curator",
-    "license": "MIT",
-    "maintainer": "Flywheel <support@flywheel.io>",
-    "name": "file-curator",
-    "source": "https://gitlab.com/flywheel-io/flywheel-apps/file-curator",
-    "url": "https://gitlab.com/flywheel-io/flywheel-apps/file-curator",
-    "version": "0.3.1"
+    "additional-input-one": {
+      "base": "file",
+      "description": "An optional input for curation.",
+      "optional": true
+    },
+    "additional-input-two": {
+      "base": "file",
+      "description": "An optional input for curation.",
+      "optional": true
+    },
+    "api-key": {
+      "base": "api-key"
+    }
+  },
+  "label": "File Curator",
+  "license": "MIT",
+  "maintainer": "Flywheel <support@flywheel.io>",
+  "name": "file-curator",
+  "source": "https://gitlab.com/flywheel-io/scientific-solutions/gears/file-curator",
+  "url": "https://gitlab.com/flywheel-io/scientific-solutions/gears/file-curator",
+  "version": "0.4.0-rc0"
 }
