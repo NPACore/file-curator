@@ -1,14 +1,10 @@
-import json
 import logging
-import os
 import random
 import zipfile
 from pathlib import Path
 from typing import Any, Dict
 
-import flywheel
 import pydicom
-from flywheel_gear_toolkit import GearToolkitContext
 from flywheel_gear_toolkit.utils.curator import FileCurator
 from flywheel_gear_toolkit.utils.reporters import AggregatedReporter
 
@@ -69,9 +65,3 @@ class Curator(FileCurator):
                             )
                         else:
                             log.error(e)
-            # except:
-            #    self.reporter.append_log(
-            #        err="Cannot open zipfile",
-            #        container_type='file',
-            #        label=file_.name
-            #    )

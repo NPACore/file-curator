@@ -1,7 +1,8 @@
 include:
   - project: flywheel-io/scientific-solutions/etc/sse-qa-ci
-    ref: abcc755ed20488f117c3cf45a083d894430248ba
+    ref: 86f3649f27409ebe46ccada4dbf0bf0a75332b38
     file: ci/default.yml
 
 variables:
   PYTEST_COV_FAIL_UNDER: 80
+  DEBUG: 9  # Set debug mode to print out executed command on qa-ci
