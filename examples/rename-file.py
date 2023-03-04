@@ -22,6 +22,8 @@ class Curator(FileCurator):
             )
             sys.exit(1)
 
+        log.info(f"Renaming file {file_.get('location').get('name')}")
+
         acq = self.context.get_container_from_ref(file_.get("hierarchy"))
         file_o = acq.get_file(self.context.get_input_filename("file-input"))
         sub = self.context.client.get_subject(file_o.parents.get("subject"))
@@ -36,7 +38,6 @@ class Curator(FileCurator):
             )
             acq.remove_file(new_name)
 
-        log.info(f"Renaming file {file_.get('location').get('name')} as {new_name}")
         self.client.move_file(
             file_o.file_id,
             {
@@ -45,3 +46,6 @@ class Curator(FileCurator):
                 "run_gear_rules": False,
             },
         )
+
+        # so that the .metadata.json is using the updated name to update the file tag
+        file_["location"]["name"] = new_name
