@@ -36,7 +36,7 @@ class Curator(FileCurator):
                 f"File with same name in container. "
                 f"Removing {new_name} from container."
             )
-            acq.remove_file(new_name)
+            acq.delete_file(new_name)
 
         self.client.move_file(
             file_o.file_id,
