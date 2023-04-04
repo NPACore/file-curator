@@ -1,8 +1,8 @@
 """A FileCuator script that renames a file based from the attributes of the
 file parents"""
 import logging
-import sys
 import os
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -33,11 +33,13 @@ class Curator(FileCurator):
         ses = self.context.client.get_session(file_o.parents.get("session"))
 
         new_name = NEW_NAME.format(sub=sub, ses=ses, acq=acq, file=file_o)
-        log.debug(f'File will be renamed as {new_name}')
+        log.debug(f"File will be renamed as {new_name}")
 
         if acq.get_file(new_name):
             input_file_path = Path(self.context.get_input_path("file-input"))
-            log.debug(f"Renaming {input_file_path} to {str(input_file_path.parent / new_name)}")
+            log.debug(
+                f"Renaming {input_file_path} to {str(input_file_path.parent / new_name)}"
+            )
             os.rename(input_file_path, input_file_path.parent / new_name)
             log.debug(f"Deleting {filename}")
             acq.delete_file(filename)
