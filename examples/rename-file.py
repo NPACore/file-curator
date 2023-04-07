@@ -1,7 +1,9 @@
 """A FileCuator script that renames a file based from the attributes of the
 file parents"""
 import logging
+import os
 import sys
+from pathlib import Path
 from typing import Any, Dict
 
 from flywheel_gear_toolkit.utils.curator import FileCurator
@@ -25,22 +27,25 @@ class Curator(FileCurator):
         log.info(f"Renaming file {file_.get('location').get('name')}")
 
         acq = self.context.get_container_from_ref(file_.get("hierarchy"))
-        file_o = acq.get_file(self.context.get_input_filename("file-input"))
+        filename = self.context.get_input_filename("file-input")
+        file_o = acq.get_file(filename)
         sub = self.context.client.get_subject(file_o.parents.get("subject"))
         ses = self.context.client.get_session(file_o.parents.get("session"))
 
         new_name = NEW_NAME.format(sub=sub, ses=ses, acq=acq, file=file_o)
+        log.debug(f"File will be renamed as {new_name}")
 
-        if file_["location"]["name"] == new_name:
-            log.info(f"New name matches old name ({new_name}), skipping.")
+        if acq.get_file(new_name):
+            input_file_path = Path(self.context.get_input_path("file-input"))
+            log.debug(
+                f"Renaming {input_file_path} to {str(input_file_path.parent / new_name)}"
+            )
+            os.rename(input_file_path, input_file_path.parent / new_name)
+            log.debug(f"Deleting {filename}")
+            acq.delete_file(filename)
+            log.debug(f"Uploading {str(input_file_path.parent / new_name)}")
+            acq.upload_file(str(input_file_path.parent / new_name))
         else:
-            if acq.get_file(new_name):
-                log.warning(
-                    f"File with same name in container. "
-                    f"Removing {new_name} from container."
-                )
-                acq.delete_file(new_name)
-
             self.client.move_file(
                 file_o.file_id,
                 {
@@ -50,6 +55,4 @@ class Curator(FileCurator):
                 },
             )
 
-        # so that the .metadata.json is using the updated name to update the file tag
         file_["location"]["name"] = new_name
-        self.context.metadata.update_file(new_name, type="source code")
