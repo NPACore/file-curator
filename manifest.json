@@ -16,7 +16,26 @@
   },
   "custom": {
     "flywheel": {
-      "suite": "Curation"
+      "suite": "Utility",
+      "classification": {
+        "species": [
+          "Phantom",
+          "Human",
+          "Animal"
+        ],
+        "organ": [
+          "Any"
+        ],
+        "therapeutic_area": [
+          "Any"
+        ],
+        "modality": [
+          "Any"
+        ],
+        "function": [
+          "Utility"
+        ]
+      }
     },
     "gear-builder": {
       "category": "converter",
@@ -63,7 +82,8 @@
       "optional": true
     },
     "api-key": {
-      "base": "api-key"
+      "base": "api-key",
+      "read-only": false
     }
   },
   "label": "File Curator",
