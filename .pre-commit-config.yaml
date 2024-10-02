@@ -10,6 +10,6 @@ repos:
       - id: isort
       - id: pytest
   - repo: https://gitlab.com/flywheel-io/scientific-solutions/etc/sse-qa-ci
-    rev: 86f3649f27409ebe46ccada4dbf0bf0a75332b38
+    rev: bf2eac494c0bb46f1f769fc5c1771dfb3d644f80
     hooks:
       - id: validate-manifest
