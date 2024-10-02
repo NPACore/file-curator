@@ -1,7 +1,7 @@
 include:
-  - project: flywheel-io/scientific-solutions/etc/sse-qa-ci
-    ref: 86f3649f27409ebe46ccada4dbf0bf0a75332b38
-    file: ci/default.yml
+  - project: flywheel-io/tools/etc/qa-ci
+    ref: 6f3f7fd65e1a4a89d2028b2748280321928a346a
+    file: ci/gear.yml
 
 variables:
   PYTEST_COV_FAIL_UNDER: 80
