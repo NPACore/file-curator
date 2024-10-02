@@ -1,14 +1,13 @@
 repos:
   - repo: https://gitlab.com/flywheel-io/tools/etc/qa-ci
-    rev: 072f91ed3240516ff4153aa16676a30663bc0617
+    rev: 733a34273433aedacf8aa5c56bc08e61e11d4893
     hooks:
-      - id: poetry_export
-      - id: docker_build
+      - id: eolfix
+      - id: jsonlint
       - id: markdownlint
+      - id: poetry_export
       - id: yamllint
-      - id: black
-      - id: isort
-      - id: pytest
+
   - repo: https://gitlab.com/flywheel-io/scientific-solutions/etc/sse-qa-ci
     rev: bf2eac494c0bb46f1f769fc5c1771dfb3d644f80
     hooks:

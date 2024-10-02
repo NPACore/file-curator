@@ -1,13 +1,12 @@
 from typing import Any, Dict, Optional, Tuple
 
-import flywheel
 from flywheel_gear_toolkit import GearToolkitContext
 
 
 def parse_config(
     context: GearToolkitContext,
 ) -> Tuple[str, Dict[str, Any], Dict[str, Optional[str]]]:
-    """Parse gear config
+    """Parse gear config.
 
     Args:
         context (GearToolkitContext):
@@ -19,7 +18,6 @@ def parse_config(
                 - (Dict[str,Any]) input file
                 - (Dict[str,Optional[str]]) Dictionary of optional additional inputs
     """
-
     curator_path = context.get_input_path("curator")
 
     file_input = context.get_input("file-input")
