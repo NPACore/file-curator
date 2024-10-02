@@ -1,4 +1,4 @@
-FROM flywheel/python:3.9-debian
+FROM flywheel/python:3.12-debian
 
 ENV FLYWHEEL="/flywheel/v0"
 WORKDIR ${FLYWHEEL}
