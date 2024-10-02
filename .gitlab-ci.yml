@@ -5,4 +5,4 @@ include:
 
 variables:
   PYTEST_COV_FAIL_UNDER: 80
-  DEBUG: 9  # Set debug mode to print out executed command on qa-ci
+    #DEBUG:ds9  # Set debug mode to print out executed command on qa-ci
