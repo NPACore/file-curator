@@ -1,8 +1,7 @@
 include:
   - project: flywheel-io/tools/etc/qa-ci
-    ref: 0c31e3d1ff8a66dad9228909f1359749ac45ed8c
     file: ci/gear.yml
+    ref: main
 
 variables:
   PYTEST_COV_FAIL_UNDER: 80
-    #DEBUG:ds9  # Set debug mode to print out executed command on qa-ci

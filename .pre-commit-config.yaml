@@ -1,14 +1,10 @@
 repos:
   - repo: https://gitlab.com/flywheel-io/tools/etc/qa-ci
-    rev: 0c31e3d1ff8a66dad9228909f1359749ac45ed8c
+    rev: main
     hooks:
       - id: eolfix
+      - id: gearcheck
       - id: jsonlint
       - id: markdownlint
       - id: poetry_export
       - id: yamllint
-
-  - repo: https://gitlab.com/flywheel-io/scientific-solutions/etc/sse-qa-ci
-    rev: bf2eac494c0bb46f1f769fc5c1771dfb3d644f80
-    hooks:
-      - id: validate-manifest
