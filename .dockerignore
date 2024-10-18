@@ -8,6 +8,7 @@
 !fw_gear_file_curator
 !README.md
 !requirements.txt
+!requirements-dev.txt
 
 # Re-ignore pycache which might be inside package dir
 **/__pycache__

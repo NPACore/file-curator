@@ -1,6 +1,6 @@
 include:
   - project: flywheel-io/tools/etc/qa-ci
-    ref: 733a34273433aedacf8aa5c56bc08e61e11d4893
+    ref: 0c31e3d1ff8a66dad9228909f1359749ac45ed8c
     file: ci/gear.yml
 
 variables:

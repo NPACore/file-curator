@@ -1,6 +1,6 @@
 repos:
   - repo: https://gitlab.com/flywheel-io/tools/etc/qa-ci
-    rev: 733a34273433aedacf8aa5c56bc08e61e11d4893
+    rev: 0c31e3d1ff8a66dad9228909f1359749ac45ed8c
     hooks:
       - id: eolfix
       - id: jsonlint
