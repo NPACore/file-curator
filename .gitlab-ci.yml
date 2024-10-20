@@ -2,6 +2,3 @@ include:
   - project: flywheel-io/tools/etc/qa-ci
     file: ci/gear.yml
     ref: main
-
-variables:
-  PYTEST_COV_FAIL_UNDER: 80
