@@ -4,7 +4,12 @@ repos:
     hooks:
       - id: eolfix
       - id: gearcheck
+      - id: hadolint
       - id: jsonlint
       - id: markdownlint
       - id: poetry_export
+      - id: ruff
+        args: []
+      - id: ruff_format
+      - id: ruff_tests
       - id: yamllint
