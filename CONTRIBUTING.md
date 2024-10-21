@@ -34,7 +34,7 @@ Dependencies are listed in the `pyproject.toml` file.
 
 Poetry manages virtual environments and can create a virtual environment with
 different versions of python, however that version must be installed on the
-machine.  
+machine.
 
 You can configure the python version by using
 `poetry env use <path/to/executable>`

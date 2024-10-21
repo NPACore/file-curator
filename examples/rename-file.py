@@ -1,5 +1,7 @@
 """A FileCuator script that renames a file based from the attributes of the
-file parents"""
+file parents.
+"""
+
 import logging
 import os
 import sys

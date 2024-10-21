@@ -51,7 +51,7 @@ class Curator(FileCurator):
         """Sets file measurement to T1.
 
          file_ format defined here: https://gitlab.com/flywheel-io/public/gears/-/tree/master/spec#the-input-configuration
-        
+
         file_ : {
             'base': 'file',
             'location': {
@@ -59,7 +59,7 @@ class Curator(FileCurator):
                 'name': '<file_name>'
             },
             'hierarchy': {
-                'type': '<container_type>', 
+                'type': '<container_type>',
                 'name': '<file_name>'
             },
             "object" : {

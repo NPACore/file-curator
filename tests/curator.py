@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from typing import Any, Dict
 
-import flywheel
-from flywheel_gear_toolkit import GearToolkitContext
 from flywheel_gear_toolkit.utils.curator import FileCurator
 from flywheel_gear_toolkit.utils.reporters import AggregatedReporter
 
