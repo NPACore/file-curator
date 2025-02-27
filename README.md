@@ -115,13 +115,29 @@ The file-curator gear comes with the following python packages installed:
 * flywheel-gear-toolkit
 __Note__: See package versions in [./pyproject.toml](pyproject.toml)
 
-If you need other dependencies that aren't installed by default.  The gear-toolkit provides
-an interface to programmatically install dependencies.  You can specify a `requirements.txt`
-file as one of the additional inputs then install them your `Curator.__init__` method:
+If you need other dependencies that aren't installed by default,
+these can be installed in two ways.
+
+#### The extra_packages argument
+
+Extra packages can be specified as an argument when instantiating the FileCurator
+class. This is the recommended way to install extra packages.
+
+```python
+class Curator(FileCurator):
+
+    def __init__(self, **kwargs):
+        super().__init__(context=GearToolkitContext(), extra_packages=["polars"], **kwargs)
+```
+
+However, if you have a `requirements.txt` file you wish to use, you can specify this
+file as one of the additional inputs for installation in the `Curator.__init__` method:
 
 ```python
 from flywheel_gear_toolkit.utils import install_requirements
 ...
+class Curator(FileCurator):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         install_requirements(self.additional_input_one)
