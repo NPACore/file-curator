@@ -1,4 +1,4 @@
-"""A FileCuator script that renames a file based from the attributes of the
+"""A FileCurator script that renames a file based from the attributes of the
 file parents.
 """
 
