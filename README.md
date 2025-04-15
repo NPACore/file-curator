@@ -22,7 +22,8 @@ a single file.
 
 ### Extending the custom curator class
 
-The `FileCurator` class is provided in the [flywheel_gear_toolkit](https://gear-toolkit.readthedocs.io/en/latest/utils.html#curator).
+The `FileCurator` class is provided in the [flywheel_gear_toolkit](
+https://flywheel-io.gitlab.io/public/gear-toolkit/flywheel_gear_toolkit/utils/#curator).
 
 This class should be extended in order to define a custom curation script.
 
