@@ -40,7 +40,7 @@
     },
     "gear-builder": {
       "category": "converter",
-      "image": "flywheel/file-curator:0.4.1-rc0"
+      "image": "flywheel/file-curator:0.4.1"
     }
   },
   "description": "Curates a given file, to be used as a gear rule",
@@ -105,5 +105,5 @@
   "name": "file-curator",
   "source": "https://gitlab.com/flywheel-io/scientific-solutions/gears/file-curator",
   "url": "https://gitlab.com/flywheel-io/scientific-solutions/gears/file-curator",
-  "version": "0.4.1-rc0"
+  "version": "0.4.1"
 }
