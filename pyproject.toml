@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fw-gear-file-curator"
-version = "0.4.0"
+version = "0.4.1"
 description = "Utility gear to curate input file based on curation script provided as input."
 authors = ["Flywheel <support@flywheel.io>"]
 readme = "README.md"
