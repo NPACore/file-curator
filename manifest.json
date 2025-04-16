@@ -16,7 +16,6 @@
   },
   "custom": {
     "flywheel": {
-      "suite": "Utility",
       "classification": {
         "species": [
           "Phantom",
@@ -35,7 +34,9 @@
         "function": [
           "Utility"
         ]
-      }
+      },
+      "show-job": true,
+      "suite": "Utility"
     },
     "gear-builder": {
       "category": "converter",
