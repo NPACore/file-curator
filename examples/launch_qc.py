@@ -34,9 +34,10 @@ class Curator(FileCurator):
         self.reporter = None
 
     def curate_file(self, file_: flywheel.FileEntry): #Dict[str, Any]):
-        log.info("looking at %s", file_.name)
-        if not re.search(r'.dicom.zip$', file_.name):
-            log.info("file '%s' is not a dicom archive! not running!", file_.name)
+        log.info("looking at %s", file_)
+        name = file_.get("name")
+        if not re.search(r'.dicom.zip$', name):
+            log.info("file '%s' is not a dicom archive! not running!", name)
             return
         jobid = launch_gear(self.client, file_)
         log.info("launched %d", jobid)
