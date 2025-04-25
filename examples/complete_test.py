@@ -51,7 +51,8 @@ class Curator(FileCurator):
         log.info("client: %s", self.client)
 
         file_id = file_['hierarchy']['id']
-        ses = self.client.get(file_id).parents.session
+        file_entity = self.client.get(file_id)
+        ses = file_entity.parents.session
         ses_acq = self.client.get(ses).acquisitions()
         files = [f.name
                  for a in ses_acq
@@ -61,6 +62,6 @@ class Curator(FileCurator):
         log.info("session has files: %s", files)
         if check_complete(files):
             log.info("complete! adding tag")
-            file_.add_tag('complete')
+            file_entity.add_tag('complete')
         else:
             log.info("not yet complete")
