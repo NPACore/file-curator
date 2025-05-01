@@ -33,11 +33,19 @@ class Curator(FileCurator):
         super().__init__(**kwargs)
         self.reporter = None
 
-    def curate_file(self, file_: flywheel.FileEntry): #Dict[str, Any]):
+    def curate_file(self, file_: Dict[str, Any]):
+        """
+        Entrypoint for file-curate gear.
+        :param file_: dict (not flywheel.FileEntry) of specified file
+                      or file which triggered gear from a gear rule.
+        """
         log.info("looking at %s", file_)
-        name = file_.get("name")
+        name = file_["location"]["name"]
         if not re.search(r'.dicom.zip$', name):
             log.info("file '%s' is not a dicom archive! not running!", name)
             return
-        jobid = launch_gear(self.client, file_)
+
+        file_id = file_['hierarchy']['id']
+        file_entity = self.client.get(file_id)
+        jobid = launch_gear(self.client, file_entity)
         log.info("launched %d", jobid)
