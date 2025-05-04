@@ -26,7 +26,7 @@ def station_to_name(station_id: str) -> str:
     # TODO: fill this out. pull PrismaXQA examples and lookt at
     # dcm.StationName
     stations = {
-        "MRC35073": "P1",
+        "MRC35073": "P3",
     }
     station = stations.get(station_id) or station_id
     return station
