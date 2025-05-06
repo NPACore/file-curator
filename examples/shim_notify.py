@@ -1,160 +1,125 @@
 #!/usr/bin/env python3
 """
-Check shim values for failure.
-Notify good/bad shim regardless.
+Shim QC: Check Z-shim offset from DICOM CSA header,
+map scanner serial to PRISMA label, and notify via email.
 """
 
 import os
 import re
 import sys
+import warnings
+from zipfile import ZipFile
+from typing import Any, Dict
 
-# tomllib is new in python 3.11. have 3.10 in guix.
-# what does 'flywheel/python-gdcm' use?
+import pydicom
+from pydicom.misc import is_dicom
+
 try:
-    import tomllib as toml
+    import tomllib as toml  # Python 3.11+
 except:
     import toml
-import warnings
-from typing import Any, Dict
-from zipfile import ZipFile
 
-import flywheel
-import pydicom
+from smtplib import SMTP
+from email.message import EmailMessage
 from flywheel_gear_toolkit.utils.curator import FileCurator
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    # UserWarning: The DICOM readers are highly experimental...
     from nibabel.nicom import csareader
 
 
+# Map StationName → PRISMA label
+STATION_MAP = {
+    "MRC67078": "PRISMA1",
+    "AWP167046": "PRISMA2",
+    "MRC35073": "PRISMA3",
+}
+
+# Scanner-specific Z-thresholds
+Z_THRESHOLDS = {
+    "PRISMA1": 9931.513661,
+    "PRISMA2": 4505.258657,
+    "PRISMA3": 11652.571269,
+}
+
+
 def station_to_name(station_id: str) -> str:
-    # TODO: fill this out. pull PrismaXQA examples and lookt at
-    # dcm.StationName
-    stations = {
-        "MRC35073": "P3",
-    }
-    station = stations.get(station_id) or station_id
-    return station
+    return STATION_MAP.get(station_id, station_id)
 
 
-def notify_message(scanner: str, z: float):
-    """ """
-    # TODO: find failing values on rad.pitt.edu/wiki
-    #: shim values higher than this are okay
-    low_threshold = 10000
-
-    thres_str = "!!!ERROR!!! bAD SHIM\n" if z < low_threshold else "value okay. "
-
-    return f"{thres_str}{scanner}: z={z} (thres={low_threshold})"
+def notify_message(scanner: str, z: float) -> str:
+    threshold = Z_THRESHOLDS.get(scanner, 10000)
+    if z < threshold:
+        return f"!!!ERROR!!! BAD SHIM\n{scanner}: z={z:.2f} (threshold={threshold:.2f})"
+    else:
+        return f"{scanner}: z={z:.2f} (threshold={threshold:.2f}) - value okay."
 
 
-def notify(msg: str, faddr: str, taddr: str, host: any):
-    """
-    Send an email notificiation
-    :param msg: message to send
-    :param faddr: form address like xxx@yyyy.
-                  will connect to server yyyy
-    :param taddr: address to send to
-    :param host: smtp host. if none, pull form faddr
+def send_email(subject: str, body: str, sender: str, recipient: str, host: str = "localhost"):
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = recipient
+    msg.set_content(body)
 
-    Note on infractucture
-    on pitt's ewi, sending from and to the same pitt email works in php
-    mail($to,$subject,$message,$headers);
-    """
-    from smtplib import SMTP
-
-    if host is None:
-        host = re.sub(".*@", "", faddr)
-    host = 'localhost'
-    print(f"connecting to {host}")
+    print(f"Connecting to SMTP server: {host}")
     with SMTP(host) as srv:
-        print(f"connected")
-        srv.noop()
         srv.set_debuglevel(1)
-        srv.sendmail(faddr, taddr, msg)
-    #os.system('printf "From: foran@pitt.edu\nTo: foran@pitt.edu\nSubject: Test from zeus\n\nEOM" | sendmail -t foran@pitt.edu')
+        srv.send_message(msg)
 
 
-def read_z(dcm) -> float:
+def read_z(dcm: pydicom.Dataset) -> float:
     """
-    Read lOffsetZ from CSA header
-    This assumes a lot about the dicoms header! likely to fail on new data
-    :param dcm: dicom from pydicom
-    :return: Z shim value as a float
+    Parse sGRADSPEC.asGPAData[0].lOffsetZ from Siemens CSA header
     """
     csa = dcm.get((0x0029, 0x1020))
     csa_s = csareader.read(csa.value)
     asccov = csa_s["tags"]["MrPhoenixProtocol"]["items"][0]
-    reg = re.compile(r"sGRADSPEC.asGPAData\[0\].lOffsetZ\s*=\s*([^\s]+)")
-    return float(reg.search(asccov).group(1))
+    match = re.search(r"sGRADSPEC.asGPAData\[0\].lOffsetZ\s*=\s*([^\s]+)", asccov)
+    return float(match.group(1))
 
 
 def update_db(fw, dest_id, z: float):
-    """
-    Flywheel SDK gear style DB update: write snr peak value to sess.info.snr
-    Requires write permission when used as a gear rule.
-
-    :param context: implicit context when running as a gear
-    :param z: z shim parameter
-    """
-    # fw = context.client
-    # cid = context.destination['id']
     container = fw.get(dest_id)
-    if container is None:
-        raise Exception(f"no containder '{cid}'")
-
+    if not container:
+        raise Exception(f"No container with id '{dest_id}'")
     sess = fw.get(container.parents.session)
-    info = {"z": z}
-    # 20250422 - confirmed updateding info
-    #            does not clear keys that are not specified
-    #            will only add z, will not remove eg. 'shims'
-    sess.update_info(info)
-    print(f"updated sess db: {info}")
+    sess.update_info({"z": z})
+    print(f"Updated Flywheel session info: z = {z}")
 
 
-def first_dicom_from_zip(zfname) -> pydicom.dataset.FileDataset:
+def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
     """
-    read the first non-zero (hopefully dicom) file from a zip file
-    :param zfname: zip file path
-    :return: dicom object
+    Extract first DICOM file from a zip
     """
     with ZipFile(zfname) as zf:
-        first = [x for x in zf.filelist if x.file_size > 0][0]
-        with zf.open(first.filename) as dcm_fh:
-            dcm = pydicom.dcmread(dcm_fh)
-    return dcm
+        for entry in zf.filelist:
+            if entry.file_size > 0:
+                with zf.open(entry.filename) as fh:
+                    return pydicom.dcmread(fh)
+    raise ValueError("No valid DICOM found in zip.")
 
 
-def main(input_path, from_addr, to_addr):
-    """
-    Get only the z shim value. Optionally, email state
-    Maybe eventually also update FW DB
-    """
-    dcm = first_dicom_from_zip(input_path)
+def read_emails(toml_path: str) -> tuple[str, str, str]:
+    with open(toml_path, "rb") as fh:
+        config = toml.load(fh)
+    return (
+        config["from"],
+        config.get("to", config["from"]),
+        config.get("host", "localhost")
+    )
+
+
+def main(zip_path: str, from_addr: str, to_addr: str, host: str = "localhost"):
+    dcm = first_dicom_from_zip(zip_path)
     z = read_z(dcm)
     scanner = station_to_name(dcm.StationName)
-    print(f"# {z} {scanner}")
+    print(f"# Z={z:.2f} from {scanner} (StationName={dcm.StationName})")
 
-    # update_db(fw, )
+    msg = notify_message(scanner, z)
+    print(msg)
 
-    if from_addr:
-        msg = notify_message(scanner, z)
-        notify(msg, from_addr, to_addr)
-
-
-def read_emails(toml_path) -> tuple[str, str]:
-    """
-    read TOML file to extact from and to. only from is required
-
-    from = "foran@pitt.edu"
-    to = "foran@pitt.edu"
-    host = "smtp.host.edu"
-    """
-    # tomllib wants 'rb' not 'r'?
-    with open(toml_path, "r") as toml_fh:
-        emails = toml.load(toml_fh)
-    return (emails["from"], emails.get("to") or emails["from"], emails.get("host"))
+    send_email(subject="Shim QC Alert", body=msg, sender=from_addr, recipient=to_addr, host=host)
 
 
 class Curator(FileCurator):
@@ -163,16 +128,17 @@ class Curator(FileCurator):
         self.reporter = None
 
     def curate_file(self, file_: Dict[str, Any]):
-        input_path = file_["location"]["path"]
-        toml_file = self.context.get_input_path("additional-input-one")
-        from_addr, to_addr, host = read_emails(toml_file)
-        main(input_path, from_addr, from_addr, host)
+        zip_path = file_["location"]["path"]
+        toml_path = self.context.get_input_path("additional-input-one")
+        from_addr, to_addr, host = read_emails(toml_path)
+        main(zip_path, from_addr, to_addr, host)
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print(f"USAGE: {sys.argv[0]} dicom.zip emails.toml")
+        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml>")
         sys.exit(1)
-    input_path = sys.argv[1]
-    from_addr, to_addr = read_emails(sys.argv[2])
-    main(input_path, from_addr, from_addr)
+    zip_path = sys.argv[1]
+    from_addr, to_addr, host = read_emails(sys.argv[2])
+    main(zip_path, from_addr, to_addr, host)
+
