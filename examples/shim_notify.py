@@ -7,7 +7,13 @@ Notify good/bad shim regardless.
 import os
 import re
 import sys
-import tomllib
+
+# tomllib is new in python 3.11. have 3.10 in guix.
+# what does 'flywheel/python-gdcm' use?
+try:
+    import tomllib as toml
+except:
+    import toml
 import warnings
 from typing import Any, Dict
 from zipfile import ZipFile
@@ -43,13 +49,14 @@ def notify_message(scanner: str, z: float):
     return f"{thres_str}{scanner}: z={z} (thres={low_threshold})"
 
 
-def notify(msg: str, faddr: str, taddr: str):
+def notify(msg: str, faddr: str, taddr: str, host: any):
     """
     Send an email notificiation
     :param msg: message to send
     :param faddr: form address like xxx@yyyy.
                   will connect to server yyyy
     :param taddr: address to send to
+    :param host: smtp host. if none, pull form faddr
 
     Note on infractucture
     on pitt's ewi, sending from and to the same pitt email works in php
@@ -57,9 +64,16 @@ def notify(msg: str, faddr: str, taddr: str):
     """
     from smtplib import SMTP
 
-    with SMTP(re.sub(".*@", "", faddr)) as srv:
-        srv.sest_debuglevel(1)
+    if host is None:
+        host = re.sub(".*@", "", faddr)
+    host = 'localhost'
+    print(f"connecting to {host}")
+    with SMTP(host) as srv:
+        print(f"connected")
+        srv.noop()
+        srv.set_debuglevel(1)
         srv.sendmail(faddr, taddr, msg)
+    #os.system('printf "From: foran@pitt.edu\nTo: foran@pitt.edu\nSubject: Test from zeus\n\nEOM" | sendmail -t foran@pitt.edu')
 
 
 def read_z(dcm) -> float:
@@ -135,10 +149,12 @@ def read_emails(toml_path) -> tuple[str, str]:
 
     from = "foran@pitt.edu"
     to = "foran@pitt.edu"
+    host = "smtp.host.edu"
     """
-    with open(toml_path, "rb") as toml_fh:
-        emails = tomllib.load(toml_fh)
-    return (emails["from"], emails.get("to") or emails["from"])
+    # tomllib wants 'rb' not 'r'?
+    with open(toml_path, "r") as toml_fh:
+        emails = toml.load(toml_fh)
+    return (emails["from"], emails.get("to") or emails["from"], emails.get("host"))
 
 
 class Curator(FileCurator):
@@ -149,8 +165,8 @@ class Curator(FileCurator):
     def curate_file(self, file_: Dict[str, Any]):
         input_path = file_["location"]["path"]
         toml_file = self.context.get_input_path("additional-input-one")
-        from_addr, to_addr = read_emails(toml_file)
-        main(input_path, from_addr, from_addr)
+        from_addr, to_addr, host = read_emails(toml_file)
+        main(input_path, from_addr, from_addr, host)
 
 
 if __name__ == "__main__":
