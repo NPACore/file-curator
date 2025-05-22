@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import flywheel
 from flywheel_gear_toolkit.utils.curator import FileCurator
-from flywheel_gear_toolkit.utils.reporters import AggregatedReporter
+from flywheel_gear_toolkit import GearToolkitContext
 
 log = logging.getLogger("launchHPC")
 log.setLevel("DEBUG")
@@ -71,7 +71,7 @@ def read_fernet_file(file_in: str) -> str:
 
 class Curator(FileCurator):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(context=GearToolkitContext(), extra_packages=["cryptography"], **kwargs)
         self.reporter = None
 
     def curate_file(self, file_: Dict[str, Any]):
