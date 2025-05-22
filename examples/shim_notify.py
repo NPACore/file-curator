@@ -2,8 +2,12 @@
 """
 Shim QC: Check Z-shim offset from DICOM CSA header,
 map scanner serial to PRISMA label, and notify via email.
+
+NB. for smtp host, pitt allows plaintext un-authed connections from whitelisted IPs. for server host name, see 'nslookup -type=mx pitt.edu'
+
 """
 
+import logging
 import os
 import re
 import sys
@@ -18,6 +22,7 @@ try:
     import tomllib as toml  # Python 3.11+
 except:
     import toml
+    logging.warning("old python %s. using 'toml' library to read email settings", sys.version)
 
 from smtplib import SMTP
 from email.message import EmailMessage
@@ -27,6 +32,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from nibabel.nicom import csareader
 
+log = logging.getLogger("shimtest")
 
 # Map StationName → PRISMA label
 STATION_MAP = {
@@ -46,15 +52,6 @@ Z_THRESHOLDS = {
 def station_to_name(station_id: str) -> str:
     return STATION_MAP.get(station_id, station_id)
 
-
-def notify_message(scanner: str, z: float) -> str:
-    threshold = Z_THRESHOLDS.get(scanner, 10000)
-    if z < threshold:
-        return f"!!!ERROR!!! BAD SHIM\n{scanner}: z={z:.2f} (threshold={threshold:.2f})"
-    else:
-        return f"{scanner}: z={z:.2f} (threshold={threshold:.2f}) - value okay."
-
-
 def send_email(subject: str, body: str, sender: str, recipient: str, host: str = "localhost"):
     msg = EmailMessage()
     msg["Subject"] = subject
@@ -62,8 +59,8 @@ def send_email(subject: str, body: str, sender: str, recipient: str, host: str =
     msg["To"] = recipient
     msg.set_content(body)
 
-    print(f"Connecting to SMTP server: {host}")
-    with SMTP(host) as srv:
+    log.info(f"Connecting to SMTP server: {host}")
+    with SMTP(host, timeout=30) as srv:
         srv.set_debuglevel(1)
         srv.send_message(msg)
 
@@ -85,7 +82,7 @@ def update_db(fw, dest_id, z: float):
         raise Exception(f"No container with id '{dest_id}'")
     sess = fw.get(container.parents.session)
     sess.update_info({"z": z})
-    print(f"Updated Flywheel session info: z = {z}")
+    log.info(f"Updated Flywheel session info: z = {z}")
 
 
 def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
@@ -114,12 +111,20 @@ def main(zip_path: str, from_addr: str, to_addr: str, host: str = "localhost"):
     dcm = first_dicom_from_zip(zip_path)
     z = read_z(dcm)
     scanner = station_to_name(dcm.StationName)
-    print(f"# Z={z:.2f} from {scanner} (StationName={dcm.StationName})")
 
-    msg = notify_message(scanner, z)
+    threshold = Z_THRESHOLDS.get(scanner, 10000)
+    failed = z <= threshold
+    log.info(f"Z={z:.2f} from {scanner} (StationName={dcm.StationName}) <= threshold {threshold}? {failed}")
+
+    if failed:
+        subj = f"[{scanner}] FAILED (z={z} <= {threshold})" 
+        msg = f"!!!ERROR!!! BAD SHIM\n{scanner}: z={z:.2f} (threshold={threshold:.2f})."
+    else:
+        subj = f"[{scanner}] shim okay (z={z} <= {threshold})" 
+        msg = f"shim looks okay for {scanner}; z={z:.2f} (threshold={threshold:.2f})."
     print(msg)
 
-    send_email(subject="Shim QC Alert", body=msg, sender=from_addr, recipient=to_addr, host=host)
+    send_email(subject=subj, body=msg, sender=from_addr, recipient=to_addr, host=host)
 
 
 class Curator(FileCurator):
@@ -135,6 +140,7 @@ class Curator(FileCurator):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml>")
         sys.exit(1)
