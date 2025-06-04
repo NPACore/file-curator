@@ -52,6 +52,15 @@ Z_THRESHOLDS = {
 def station_to_name(station_id: str) -> str:
     return STATION_MAP.get(station_id, station_id)
 
+
+def notify_message(scanner: str, z: float) -> str:
+    threshold = Z_THRESHOLDS.get(scanner, 10000)
+    if z >= threshold:
+        return f"{scanner} ✅: z={z:.2f} >= {threshold:.2f} - value okay." 
+    else:
+        return f"{scanner}: ⛔: z={z:.2f} < {threshold:.2f} - BAD SHIM"
+
+
 def send_email(subject: str, body: str, sender: str, recipient: str, host: str = "localhost"):
     msg = EmailMessage()
     msg["Subject"] = subject
@@ -124,7 +133,9 @@ def main(zip_path: str, from_addr: str, to_addr: str, host: str = "localhost"):
         msg = f"shim looks okay for {scanner}; z={z:.2f} (threshold={threshold:.2f})."
     print(msg)
 
-    send_email(subject=subj, body=msg, sender=from_addr, recipient=to_addr, host=host)
+    emoji = "✅" if z >= Z_THRESHOLDS.get(scanner, 10000) else "⛔"
+    subject = f"{scanner} {emoji} Shim QC Alert"
+    send_email(subject=subject, body=msg, sender=from_addr, recipient=to_addr, host=host)
 
 
 class Curator(FileCurator):
