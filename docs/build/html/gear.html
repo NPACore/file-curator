@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="y" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shim Notify Gear &mdash; file-curator 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=73e7982a"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="fw_gear_file_curator package" href="fw_gear_file_curator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            file-curator
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">fw_gear_file_curator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shim Notify Gear</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-summary">Workflow summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-shim_notify">Source Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.Curator"><code class="docutils literal notranslate"><span class="pre">Curator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#shim_notify.Curator.reporter"><code class="docutils literal notranslate"><span class="pre">Curator.reporter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shim_notify.Curator.curate_file"><code class="docutils literal notranslate"><span class="pre">Curator.curate_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.first_dicom_from_zip"><code class="docutils literal notranslate"><span class="pre">first_dicom_from_zip()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.notify_message"><code class="docutils literal notranslate"><span class="pre">notify_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.read_emails"><code class="docutils literal notranslate"><span class="pre">read_emails()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.read_z"><code class="docutils literal notranslate"><span class="pre">read_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.send_email"><code class="docutils literal notranslate"><span class="pre">send_email()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.station_to_name"><code class="docutils literal notranslate"><span class="pre">station_to_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shim_notify.update_db"><code class="docutils literal notranslate"><span class="pre">update_db()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">file-curator</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Shim Notify Gear</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gear.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="shim-notify-gear">
+<h1>Shim Notify Gear<a class="headerlink" href="#shim-notify-gear" title="Link to this heading"></a></h1>
+<p>The <cite>shim_notify.py</cite> script runs as the main entrypoint of the Flywheel gear.
+It performs Z-shim quality checks on Siemens MRI data and notifies relevant users via email.</p>
+<p>Each email recipient entry should include:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[[recipients]]</span>
+<span class="n">from</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;scanner-alerts@example.com&quot;</span>
+<span class="n">to</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tech@example.com&quot;</span>
+<span class="n">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;smtp.example.com&quot;</span>
+</pre></div>
+</div>
+<section id="workflow-summary">
+<h2>Workflow summary<a class="headerlink" href="#workflow-summary" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Extract the first DICOM file from the ZIP archive.</p></li>
+<li><p>Parse Siemens CSA headers to extract the Z-shim offset.</p></li>
+<li><p>Determine scanner type from <cite>StationName</cite>.</p></li>
+<li><p>Compare Z value to scanner-specific threshold.</p></li>
+<li><p>Notify recipients with pass/fail result.</p></li>
+<li><p>Optionally update Flywheel session metadata (if run within a gear context).</p></li>
+</ol>
+</section>
+<section id="module-shim_notify">
+<span id="source-code-reference"></span><h2>Source Code Reference<a class="headerlink" href="#module-shim_notify" title="Link to this heading"></a></h2>
+<p>Shim QC Script</p>
+<p>This script checks the Z-shim offset from a Siemens CSA DICOM header,
+maps the scanner serial number to a PRISMA label, and sends a notification
+email indicating whether the shim value meets the threshold.</p>
+<p>For SMTP, UPMC and Pitt typically use Exchange Online Protection.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="shim_notify.Curator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">Curator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shim_notify.html#Curator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.Curator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FileCurator</span></code></p>
+<p>Flywheel Curator class to run shim QC within Flywheel gear.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shim_notify.Curator.reporter">
+<span class="sig-name descname"><span class="pre">reporter</span></span><a class="headerlink" href="#shim_notify.Curator.reporter" title="Link to this definition"></a></dt>
+<dd><p>Optional placeholder for future reporting extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shim_notify.Curator.curate_file">
+<span class="sig-name descname"><span class="pre">curate_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shim_notify.html#Curator.curate_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.Curator.curate_file" title="Link to this definition"></a></dt>
+<dd><p>Process a file by performing shim QC and sending notifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>dict</em>) -- Metadata for the input file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.first_dicom_from_zip">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">first_dicom_from_zip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zfname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="reference internal" href="_modules/shim_notify.html#first_dicom_from_zip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.first_dicom_from_zip" title="Link to this definition"></a></dt>
+<dd><p>Extract and return the first valid DICOM file from a ZIP archive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>zfname</strong> (<em>str</em>) -- Path to ZIP file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>First readable DICOM dataset found in the ZIP.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pydicom.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.main">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zip_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email_configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shim_notify.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.main" title="Link to this definition"></a></dt>
+<dd><p>Run shim QC check and send email notifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zip_path</strong> (<em>str</em>) -- Path to ZIP file containing DICOMs.</p></li>
+<li><p><strong>email_configs</strong> (<em>list</em><em> of </em><em>dict</em>) -- Email configuration dictionary list.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.notify_message">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">notify_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scanner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/shim_notify.html#notify_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.notify_message" title="Link to this definition"></a></dt>
+<dd><p>Generate a notification message based on the Z-shim value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scanner</strong> (<em>str</em>) -- Scanner label (e.g. &quot;PRISMA1&quot;).</p></li>
+<li><p><strong>z</strong> (<em>float</em>) -- Z-shim offset value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Message indicating if shim is OK or bad.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.read_emails">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">read_emails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">toml_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/shim_notify.html#read_emails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.read_emails" title="Link to this definition"></a></dt>
+<dd><p>Load email recipient configuration from TOML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>toml_path</strong> (<em>str</em>) -- Path to the TOML config file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed recipient configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.read_z">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">read_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/shim_notify.html#read_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.read_z" title="Link to this definition"></a></dt>
+<dd><p>Read the Z-shim offset from the Siemens CSA header.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dcm</strong> (<em>pydicom.Dataset</em>) -- Parsed DICOM dataset.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Extracted Z-shim offset value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.send_email">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">send_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'localhost'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shim_notify.html#send_email"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.send_email" title="Link to this definition"></a></dt>
+<dd><p>Send an email notification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subject</strong> (<em>str</em>) -- Email subject.</p></li>
+<li><p><strong>body</strong> (<em>str</em>) -- Email body.</p></li>
+<li><p><strong>sender</strong> (<em>str</em>) -- From address.</p></li>
+<li><p><strong>recipient</strong> (<em>str</em>) -- To address.</p></li>
+<li><p><strong>host</strong> (<em>str</em><em>, </em><em>optional</em>) -- SMTP host server (default is localhost).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.station_to_name">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">station_to_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/shim_notify.html#station_to_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.station_to_name" title="Link to this definition"></a></dt>
+<dd><p>Map a scanner StationName ID to a human-readable PRISMA label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>station_id</strong> (<em>str</em>) -- The scanner's StationName from DICOM headers.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Human-readable PRISMA label or original station ID if unknown.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="shim_notify.update_db">
+<span class="sig-prename descclassname"><span class="pre">shim_notify.</span></span><span class="sig-name descname"><span class="pre">update_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shim_notify.html#update_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shim_notify.update_db" title="Link to this definition"></a></dt>
+<dd><p>Update Flywheel session info with Z-shim value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fw</strong> (<em>flywheel.Client</em>) -- Flywheel client instance.</p></li>
+<li><p><strong>dest_id</strong> (<em>str</em>) -- Destination container ID (usually an analysis or acquisition).</p></li>
+<li><p><strong>z</strong> (<em>float</em>) -- Z-shim offset value to store.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="fw_gear_file_curator.html" class="btn btn-neutral float-left" title="fw_gear_file_curator package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Will Foran, Elijah Hudlow.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
