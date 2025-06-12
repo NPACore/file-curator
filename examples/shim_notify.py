@@ -6,7 +6,7 @@ This script checks the Z-shim offset from a Siemens CSA DICOM header,
 maps the scanner serial number to a PRISMA label, and sends a notification
 email indicating whether the shim value meets the threshold.
 
-For SMTP, UPMC and Pitt typically use Exchange Online Protection.
+It loads station map and threshold values from a YAML file.
 """
 
 import logging
@@ -26,6 +26,7 @@ except:
     import toml
     logging.warning("Old Python %s – using 'toml' fallback", sys.version)
 
+import yaml
 from smtplib import SMTP
 from email.message import EmailMessage
 from flywheel_gear_toolkit.utils.curator import FileCurator
@@ -36,22 +37,26 @@ with warnings.catch_warnings():
 
 log = logging.getLogger("shimtest")
 
-# Map StationName → PRISMA label
-STATION_MAP = {
-    "MRC67078": "PRISMA1",
-    "AWP167046": "PRISMA2",
-    "MRC35073": "PRISMA3",
-}
 
-# Scanner-specific Z-thresholds
-Z_THRESHOLDS = {
-    "PRISMA1": 9931.513661,
-    "PRISMA2": 4505.258657,
-    "PRISMA3": 11652.571269,
-}
+def load_yaml_config(path: str) -> dict:
+    """
+    Load station map and z thresholds from a YAML file.
+
+    Parameters
+    ----------
+    path : str
+        Path to the YAML config file.
+
+    Returns
+    -------
+    dict
+        Dictionary with 'station_map' and 'z_thresholds'.
+    """
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
 
 
-def station_to_name(station_id: str) -> str:
+def station_to_name(station_id: str, station_map: dict) -> str:
     """
     Map a scanner StationName ID to a human-readable PRISMA label.
 
@@ -59,16 +64,18 @@ def station_to_name(station_id: str) -> str:
     ----------
     station_id : str
         The scanner's StationName from DICOM headers.
+    station_map : dict
+        Mapping from StationName to PRISMA label.
 
     Returns
     -------
     str
         Human-readable PRISMA label or original station ID if unknown.
     """
-    return STATION_MAP.get(station_id, station_id)
+    return station_map.get(station_id, station_id)
 
 
-def notify_message(scanner: str, z: float) -> str:
+def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
     """
     Generate a notification message based on the Z-shim value.
 
@@ -78,13 +85,15 @@ def notify_message(scanner: str, z: float) -> str:
         Scanner label (e.g. "PRISMA1").
     z : float
         Z-shim offset value.
+    z_thresholds : dict
+        Thresholds for each scanner label.
 
     Returns
     -------
     str
         Message indicating if shim is OK or bad.
     """
-    threshold = Z_THRESHOLDS.get(scanner, 10000)
+    threshold = z_thresholds.get(scanner, 10000)
     if z >= threshold:
         return f"{scanner} ✅: z={z:.2f} ≥ {threshold:.2f} – value okay."
     else:
@@ -203,7 +212,7 @@ def read_emails(toml_path: str) -> list[dict]:
     return config["recipients"]
 
 
-def main(zip_path: str, email_configs: list[dict]):
+def main(zip_path: str, email_configs: list[dict], config_path: str):
     """
     Run shim QC check and send email notifications.
 
@@ -213,16 +222,22 @@ def main(zip_path: str, email_configs: list[dict]):
         Path to ZIP file containing DICOMs.
     email_configs : list of dict
         Email configuration dictionary list.
+    config_path : str
+        Path to shim_config.yaml with station map and thresholds.
     """
+    config = load_yaml_config(config_path)
+    station_map = config["station_map"]
+    z_thresholds = config["z_thresholds"]
+
     dcm = first_dicom_from_zip(zip_path)
     z = read_z(dcm)
-    scanner = station_to_name(dcm.StationName)
+    scanner = station_to_name(dcm.StationName, station_map)
     print(f"# Z={z:.2f} from {scanner} (StationName={dcm.StationName})")
 
-    msg = notify_message(scanner, z)
+    msg = notify_message(scanner, z, z_thresholds)
     print(msg)
 
-    emoji = "✅" if z >= Z_THRESHOLDS.get(scanner, 10000) else "⛔"
+    emoji = "✅" if z >= z_thresholds.get(scanner, 10000) else "⛔"
     subject = f"{scanner} {emoji} Shim QC Alert"
 
     for entry in email_configs:
@@ -249,33 +264,24 @@ class Curator(FileCurator):
     """
 
     def __init__(self, **kwargs):
-        """
-        Initialize the Curator with FileCurator context.
-        """
         super().__init__(**kwargs)
         self.reporter = None
 
     def curate_file(self, file_: Dict[str, Any]):
-        """
-        Process a file by performing shim QC and sending notifications.
-
-        Parameters
-        ----------
-        file_ : dict
-            Metadata for the input file.
-        """
         zip_path = file_["location"]["path"]
         toml_path = self.context.get_input_path("additional-input-one")
+        yaml_path = self.context.get_input_path("additional-input-two")
         email_configs = read_emails(toml_path)
-        main(zip_path, email_configs)
+        main(zip_path, email_configs, yaml_path)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
-    if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml>")
+    if len(sys.argv) != 4:
+        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml> <shim_config.yaml>")
         sys.exit(1)
     zip_path = sys.argv[1]
     email_configs = read_emails(sys.argv[2])
-    main(zip_path, email_configs)
+    config_path = sys.argv[3]
+    main(zip_path, email_configs, config_path)
 
