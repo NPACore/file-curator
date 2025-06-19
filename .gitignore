@@ -13,3 +13,4 @@ junit.xml
 
 # Editor specific stuff
 .vscode
+docs/build/
