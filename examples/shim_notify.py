@@ -6,7 +6,7 @@ This script checks the Z-shim offset from a Siemens CSA DICOM header,
 maps the scanner serial number to a PRISMA label, and sends a notification
 email indicating whether the shim value meets the threshold.
 
-It loads station map and threshold values from a YAML file.
+It loads station map and threshold values from a TOML file.
 """
 
 import logging
@@ -26,7 +26,6 @@ except:
     import toml
     logging.warning("Old Python %s – using 'toml' fallback", sys.version)
 
-import yaml
 from smtplib import SMTP
 from email.message import EmailMessage
 from flywheel_gear_toolkit.utils.curator import FileCurator
@@ -38,61 +37,29 @@ with warnings.catch_warnings():
 log = logging.getLogger("shimtest")
 
 
-def load_yaml_config(path: str) -> dict:
+def load_toml_config(path: str) -> dict:
     """
-    Load station map and z thresholds from a YAML file.
+    Load station map and z thresholds from a TOML file.
 
     Parameters
     ----------
     path : str
-        Path to the YAML config file.
+        Path to the TOML config file.
 
     Returns
     -------
     dict
         Dictionary with 'station_map' and 'z_thresholds'.
     """
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
+    with open(path, "rb") as f:
+        return toml.load(f)
 
 
 def station_to_name(station_id: str, station_map: dict) -> str:
-    """
-    Map a scanner StationName ID to a human-readable PRISMA label.
-
-    Parameters
-    ----------
-    station_id : str
-        The scanner's StationName from DICOM headers.
-    station_map : dict
-        Mapping from StationName to PRISMA label.
-
-    Returns
-    -------
-    str
-        Human-readable PRISMA label or original station ID if unknown.
-    """
     return station_map.get(station_id, station_id)
 
 
 def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
-    """
-    Generate a notification message based on the Z-shim value.
-
-    Parameters
-    ----------
-    scanner : str
-        Scanner label (e.g. "PRISMA1").
-    z : float
-        Z-shim offset value.
-    z_thresholds : dict
-        Thresholds for each scanner label.
-
-    Returns
-    -------
-    str
-        Message indicating if shim is OK or bad.
-    """
     threshold = z_thresholds.get(scanner, 10000)
     if z >= threshold:
         return f"{scanner} ✅: z={z:.2f} ≥ {threshold:.2f} – value okay."
@@ -101,22 +68,6 @@ def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
 
 
 def send_email(subject: str, body: str, sender: str, recipient: str, host: str = "localhost"):
-    """
-    Send an email notification.
-
-    Parameters
-    ----------
-    subject : str
-        Email subject.
-    body : str
-        Email body.
-    sender : str
-        From address.
-    recipient : str
-        To address.
-    host : str, optional
-        SMTP host server (default is localhost).
-    """
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = sender
@@ -130,19 +81,6 @@ def send_email(subject: str, body: str, sender: str, recipient: str, host: str =
 
 
 def read_z(dcm: pydicom.Dataset) -> float:
-    """
-    Read the Z-shim offset from the Siemens CSA header.
-
-    Parameters
-    ----------
-    dcm : pydicom.Dataset
-        Parsed DICOM dataset.
-
-    Returns
-    -------
-    float
-        Extracted Z-shim offset value.
-    """
     csa = dcm.get((0x0029, 0x1020))
     csa_s = csareader.read(csa.value)
     asccov = csa_s["tags"]["MrPhoenixProtocol"]["items"][0]
@@ -151,18 +89,6 @@ def read_z(dcm: pydicom.Dataset) -> float:
 
 
 def update_db(fw, dest_id, z: float):
-    """
-    Update Flywheel session info with Z-shim value.
-
-    Parameters
-    ----------
-    fw : flywheel.Client
-        Flywheel client instance.
-    dest_id : str
-        Destination container ID (usually an analysis or acquisition).
-    z : float
-        Z-shim offset value to store.
-    """
     container = fw.get(dest_id)
     if not container:
         raise Exception(f"No container with id '{dest_id}'")
@@ -172,19 +98,6 @@ def update_db(fw, dest_id, z: float):
 
 
 def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
-    """
-    Extract and return the first valid DICOM file from a ZIP archive.
-
-    Parameters
-    ----------
-    zfname : str
-        Path to ZIP file.
-
-    Returns
-    -------
-    pydicom.Dataset
-        First readable DICOM dataset found in the ZIP.
-    """
     with ZipFile(zfname) as zf:
         for entry in zf.filelist:
             if entry.file_size > 0:
@@ -194,19 +107,6 @@ def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
 
 
 def read_emails(toml_path: str) -> list[dict]:
-    """
-    Load email recipient configuration from TOML file.
-
-    Parameters
-    ----------
-    toml_path : str
-        Path to the TOML config file.
-
-    Returns
-    -------
-    list of dict
-        Parsed recipient configuration.
-    """
     with open(toml_path, "rb") as fh:
         config = toml.load(fh)
     return config["recipients"]
@@ -223,9 +123,9 @@ def main(zip_path: str, email_configs: list[dict], config_path: str):
     email_configs : list of dict
         Email configuration dictionary list.
     config_path : str
-        Path to shim_config.yaml with station map and thresholds.
+        Path to shim_config.toml with station map and thresholds.
     """
-    config = load_yaml_config(config_path)
+    config = load_toml_config(config_path)
     station_map = config["station_map"]
     z_thresholds = config["z_thresholds"]
 
@@ -254,15 +154,6 @@ def main(zip_path: str, email_configs: list[dict], config_path: str):
 
 
 class Curator(FileCurator):
-    """
-    Flywheel Curator class to run shim QC within Flywheel gear.
-
-    Attributes
-    ----------
-    reporter : Any
-        Optional placeholder for future reporting extension.
-    """
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.reporter = None
@@ -270,15 +161,15 @@ class Curator(FileCurator):
     def curate_file(self, file_: Dict[str, Any]):
         zip_path = file_["location"]["path"]
         toml_path = self.context.get_input_path("additional-input-one")
-        yaml_path = self.context.get_input_path("additional-input-two")
+        config_path = self.context.get_input_path("additional-input-two")
         email_configs = read_emails(toml_path)
-        main(zip_path, email_configs, yaml_path)
+        main(zip_path, email_configs, config_path)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
     if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml> <shim_config.yaml>")
+        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml> <shim_config.toml>")
         sys.exit(1)
     zip_path = sys.argv[1]
     email_configs = read_emails(sys.argv[2])
