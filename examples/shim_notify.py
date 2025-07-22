@@ -1,12 +1,43 @@
 #!/usr/bin/env python3
 """
-Shim QC Script
+Shim Notify Gear
+================
 
-This script checks the Z-shim offset from a Siemens CSA DICOM header,
-maps the scanner serial number to a PRISMA label, and sends a notification
-email indicating whether the shim value meets the threshold.
+This script performs a Z-shim quality check on Siemens MRI DICOM data,
+intended for use as a Flywheel gear or standalone utility.
 
-It loads station map and threshold values from a TOML file.
+It extracts the Z-shim offset from a Siemens CSA DICOM header, maps the
+scanner’s station ID to a project-specific label (e.g., PRISMA1), and sends
+a notification email indicating whether the shim value meets the expected
+threshold.
+
+Typical Use Cases
+-----------------
+- As a Flywheel gear: automatically check shim quality upon DICOM upload
+- As a standalone CLI script for local QA pipelines
+
+Inputs
+------
+- ZIP archive containing Siemens DICOM files
+- A TOML config file with scanner station map and Z-thresholds
+- A TOML config file listing email recipients and SMTP info
+
+Workflow Summary
+----------------
+1. Extract the first DICOM file from the ZIP archive.
+2. Parse Siemens CSA headers to extract the Z-shim offset.
+3. Determine scanner type from `StationName` using a station map.
+4. Compare Z value to scanner-specific threshold.
+5. Notify recipients with pass/fail result via SMTP.
+6. Optionally update Flywheel session metadata (if running inside a gear).
+
+Example CLI Usage
+-----------------
+python shim_notify.py dicom.zip shim-emails.toml shim_config.toml
+
+See Also
+--------
+- `FileCurator` class in flywheel_gear_toolkit.utils.curator
 """
 
 import logging
@@ -106,13 +137,19 @@ def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
     raise ValueError("No valid DICOM found in zip.")
 
 
-def read_emails(toml_path: str) -> list[dict]:
-    with open(toml_path, "rb") as fh:
-        config = toml.load(fh)
-    return config["recipients"]
+def read_emails(config: dict) -> list[dict]:
+    recips = config["recipients"]
+    return [
+        {
+            "host": recips["host"],
+            "from": recips["from"],
+            "to": to
+        }
+        for to in recips["to"]
+    ]
 
 
-def main(zip_path: str, email_configs: list[dict], config_path: str):
+def main(zip_path: str, config_path: str):
     """
     Run shim QC check and send email notifications.
 
@@ -128,6 +165,7 @@ def main(zip_path: str, email_configs: list[dict], config_path: str):
     config = load_toml_config(config_path)
     station_map = config["station_map"]
     z_thresholds = config["z_thresholds"]
+    email_configs = read_emails(config)
 
     dcm = first_dicom_from_zip(zip_path)
     z = read_z(dcm)
@@ -160,19 +198,16 @@ class Curator(FileCurator):
 
     def curate_file(self, file_: Dict[str, Any]):
         zip_path = file_["location"]["path"]
-        toml_path = self.context.get_input_path("additional-input-one")
-        config_path = self.context.get_input_path("additional-input-two")
-        email_configs = read_emails(toml_path)
-        main(zip_path, email_configs, config_path)
+        config_path = self.context.get_input_path("additional-input-one")
+        main(zip_path, config_path)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
-    if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <dicom.zip> <emails.toml> <shim_config.toml>")
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml>")
         sys.exit(1)
     zip_path = sys.argv[1]
-    email_configs = read_emails(sys.argv[2])
-    config_path = sys.argv[3]
-    main(zip_path, email_configs, config_path)
+    config_path = sys.argv[2]
+    main(zip_path, config_path)
 
