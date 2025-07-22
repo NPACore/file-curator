@@ -1,4 +1,8 @@
+[recipients]
+host = "upmc-edu.mail.protection.outlook.com"
+from = "hudlowe@upmc.edu"
+to = ["foranw@umpc.edu", "hudlowe@upmc.edu", "hudlowe@pitt.edu", "flywheelgearlist@list.pitt.edu"]
+
+
+
 # see 'nslookup -type=mx pitt.edu'
-host = "pitt-edu.mail.protection.outlook.com"
-from = "hudlowe@pitt.edu"
-to = "flywheelgearlist@list.pitt.edu"

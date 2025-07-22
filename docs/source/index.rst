@@ -9,7 +9,7 @@ Welcome to the documentation for **file-curator**, a utility and Flywheel gear f
 
    usage
    modules
-   gear
+   shim_notify
 
 Indices and tables
 ==================

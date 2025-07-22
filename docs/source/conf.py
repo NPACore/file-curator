@@ -21,13 +21,19 @@ release = '0.1'
 
 extensions = ['sphinx.ext.autodoc', 
               'sphinx.ext.napoleon', # Supports Google/NumPy-style docstrings 
-              'sphinx.ext.viewcode' # Adds [source] links to the docs
+              'sphinx.ext.viewcode', # Adds [source] links to the docs
+              'sphinx.ext.autosummary'
               ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
 language = 'y'
+
+
+autosummary_generate = True
+
+autodoc_mock_imports = ["flywheel_gear_toolkit", "pydicom", "nibabel", "toml"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

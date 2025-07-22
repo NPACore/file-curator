@@ -1,4 +1,0 @@
-# see 'nslookup -type=mx pitt.edu'
-host = pitt-edu.mail.protection.outlook.com
-from = "hudlowe@pitt.edu"
-to = "flywheelgearlist@list.pitt.edu"
