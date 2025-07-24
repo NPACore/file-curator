@@ -89,6 +89,13 @@ def load_toml_config(path: str) -> dict:
 def station_to_name(station_id: str, station_map: dict) -> str:
     return station_map.get(station_id, station_id)
 
+def short_scanner_name(scanner: str) -> str:
+    return {
+        "PRISMA1": "P1",
+        "PRISMA2": "P2",
+        "PRISMA3": "P3"
+    }.get(scanner, scanner)
+
 
 def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
     threshold = z_thresholds.get(scanner, 10000)
@@ -176,7 +183,8 @@ def main(zip_path: str, config_path: str):
     print(msg)
 
     emoji = "✅" if z >= z_thresholds.get(scanner, 10000) else "⛔"
-    subject = f"{scanner} {emoji} Shim QC Alert"
+    short_name = short_scanner_name(scanner)
+    subject = f"{emoji} {short_name} z ShimQA {'okay' if emoji ==  '✅' else 'BAD'}"
 
     for entry in email_configs:
         try:

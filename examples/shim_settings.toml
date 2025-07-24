@@ -1,6 +1,6 @@
 [recipients]
 host = "upmc-edu.mail.protection.outlook.com"
-from = "hudlowe@upmc.edu"
+from = "no-reply@upmc.edu"
 to = ["foranw@umpc.edu", "hudlowe@upmc.edu", "hudlowe@pitt.edu", "flywheelgearlist@list.pitt.edu"]
 
 [station_map]
