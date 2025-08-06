@@ -39,7 +39,6 @@ See Also
 --------
 - `FileCurator` class in flywheel_gear_toolkit.utils.curator
 """
-
 import logging
 import os
 import re
@@ -55,6 +54,7 @@ try:
     import tomllib as toml  # Python 3.11+
 except:
     import toml
+
     logging.warning("Old Python %s – using 'toml' fallback", sys.version)
 
 from smtplib import SMTP
@@ -89,12 +89,9 @@ def load_toml_config(path: str) -> dict:
 def station_to_name(station_id: str, station_map: dict) -> str:
     return station_map.get(station_id, station_id)
 
+
 def short_scanner_name(scanner: str) -> str:
-    return {
-        "PRISMA1": "P1",
-        "PRISMA2": "P2",
-        "PRISMA3": "P3"
-    }.get(scanner, scanner)
+    return {"PRISMA1": "P1", "PRISMA2": "P2", "PRISMA3": "P3"}.get(scanner, scanner)
 
 
 def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
@@ -105,7 +102,9 @@ def notify_message(scanner: str, z: float, z_thresholds: dict) -> str:
         return f"{scanner} ⛔: z={z:.2f} < {threshold:.2f} – BAD SHIM"
 
 
-def send_email(subject: str, body: str, sender: str, recipient: str, host: str = "localhost"):
+def send_email(
+    subject: str, body: str, sender: str, recipient: str, host: str = "localhost"
+):
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = sender
@@ -147,16 +146,30 @@ def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
 def read_emails(config: dict) -> list[dict]:
     recips = config["recipients"]
     return [
-        {
-            "host": recips["host"],
-            "from": recips["from"],
-            "to": to
-        }
+        {"host": recips["host"], "from": recips["from"], "to": to}
         for to in recips["to"]
     ]
 
 
-def main(zip_path: str, config_path: str):
+def get_subject_label(session_id: str) -> str:
+    import flywheel
+
+    fw = flywheel.Client()
+    session = fw.get(session_id)
+
+    subject_ref = session.subject
+    try:
+        subject_id = subject_ref.id
+    except AttributeError:
+        subject_id = (
+            subject_ref if isinstance(subject_ref, str) else subject_ref.get("id")
+        )
+
+    subject = fw.get(subject_id)
+    return subject.label
+
+
+def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
     """
     Run shim QC check and send email notifications.
 
@@ -179,12 +192,37 @@ def main(zip_path: str, config_path: str):
     scanner = station_to_name(dcm.StationName, station_map)
     print(f"# Z={z:.2f} from {scanner} (StationName={dcm.StationName})")
 
+    session_label = None
+    if dest_id:
+        try:
+            import flywheel
+
+            if context:
+                fw = flywheel.Client(context=context)
+            else:
+                fw = flywheel.Client()
+
+            container = fw.get(dest_id)
+
+            if container.container_type == "session":
+                session_label = get_subject_label(container.id)
+            else:
+                session_id = container.parents.get("session")
+                if session_id:
+                    session_label = get_subject_label(session_id)
+                else:
+                    log.warning(f"No session ID found for container {dest_id}")
+        except Exception as e:
+            log.warning(f"Failed to retrieve subject label for {dest_id}: {e}")
+
     msg = notify_message(scanner, z, z_thresholds)
+    if session_label:
+        msg += f"\nSession: {session_label}"
     print(msg)
 
     emoji = "✅" if z >= z_thresholds.get(scanner, 10000) else "⛔"
     short_name = short_scanner_name(scanner)
-    subject = f"{emoji} {short_name} z ShimQA {'okay' if emoji ==  '✅' else 'BAD'}"
+    subject = f"{emoji} {short_name} z ShimQA {'okay' if emoji == '✅' else 'BAD'}"
 
     for entry in email_configs:
         try:
@@ -193,7 +231,7 @@ def main(zip_path: str, config_path: str):
                 body=msg,
                 sender=entry["from"],
                 recipient=entry["to"],
-                host=entry["host"]
+                host=entry["host"],
             )
         except Exception as e:
             log.warning(f"Failed to send to {entry['to']} via {entry['host']}: {e}")
@@ -207,15 +245,20 @@ class Curator(FileCurator):
     def curate_file(self, file_: Dict[str, Any]):
         zip_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
-        main(zip_path, config_path)
+        dest_id = self.context.destination["id"]
+        main(zip_path, config_path, dest_id=dest_id, context=self.context)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
-    if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml>")
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO").upper())
+    if len(sys.argv) not in [3, 4]:
+        print(
+            f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id]"
+        )
         sys.exit(1)
+
     zip_path = sys.argv[1]
     config_path = sys.argv[2]
-    main(zip_path, config_path)
+    dest_id = sys.argv[3] if len(sys.argv) == 4 else None
 
+    main(zip_path, config_path, dest_id)
