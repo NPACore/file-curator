@@ -135,6 +135,8 @@ def update_db(fw, dest_id, z: float):
 
 
 def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
+    """Dicom header for first file in zip
+    Read inplace via stream, without extracting zip."""
     with ZipFile(zfname) as zf:
         for entry in zf.filelist:
             if entry.file_size > 0:
@@ -151,25 +153,27 @@ def read_emails(config: dict) -> list[dict]:
     ]
 
 
-def get_subject_label(session_id: str) -> str:
-    import flywheel
+def get_label(fw, dest_id : str|None) -> str:
+    """
+    Use fw client to fetch dest_id subject label and creation time
 
-    fw = flywheel.Client()
-    session = fw.get(session_id)
+    @param fw      Flywheel client
+    @param dest_id FW DB id of acquisition file-curate is run on, like 6899c92af38b72b829422da0
+    @return label and created date concatenated"""
+    if fw is None or dest_id is None:
+        return ''
 
-    subject_ref = session.subject
-    try:
-        subject_id = subject_ref.id
-    except AttributeError:
-        subject_id = (
-            subject_ref if isinstance(subject_ref, str) else subject_ref.get("id")
-        )
-
-    subject = fw.get(subject_id)
-    return subject.label
+    if container := fw.get(dest_id):
+        p = fw.get(container.parents.subject)
+        # sesmod = str(fw.get(container.parents.session).get('timestamp'))
+        # TODO: created timezone in Eastern
+        return p.get('label') + "@" + str(container.get('created'))
+    
+    log.warning("No session for dest %s", dest_id)
+    return ''
 
 
-def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
+def main(zip_path: str, config_path: str, dest_id: str = None, client=None):
     """
     Run shim QC check and send email notifications.
 
@@ -177,10 +181,8 @@ def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
     ----------
     zip_path : str
         Path to ZIP file containing DICOMs.
-    email_configs : list of dict
-        Email configuration dictionary list.
     config_path : str
-        Path to shim_config.toml with station map and thresholds.
+        Path to toml with email [recipients] settings, station_map, and thresholds.
     """
     config = load_toml_config(config_path)
     station_map = config["station_map"]
@@ -192,31 +194,9 @@ def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
     scanner = station_to_name(dcm.StationName, station_map)
     print(f"# Z={z:.2f} from {scanner} (StationName={dcm.StationName})")
 
-    session_label = None
-    if dest_id:
-        try:
-            import flywheel
-
-            if context:
-                fw = flywheel.Client(context=context)
-            else:
-                fw = flywheel.Client()
-
-            container = fw.get(dest_id)
-
-            if container.container_type == "session":
-                session_label = get_subject_label(container.id)
-            else:
-                session_id = container.parents.get("session")
-                if session_id:
-                    session_label = get_subject_label(session_id)
-                else:
-                    log.warning(f"No session ID found for container {dest_id}")
-        except Exception as e:
-            log.warning(f"Failed to retrieve subject label for {dest_id}: {e}")
-
     msg = notify_message(scanner, z, z_thresholds)
-    if session_label:
+
+    if session_label := get_label(client, dest_id):
         msg += f"\nSession: {session_label}"
     print(msg)
 
@@ -238,27 +218,48 @@ def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
 
 
 class Curator(FileCurator):
+    """
+    Extend flywheels class to integrate with the file-curate gear.
+    py:func:`Curator.curate_file` is launch point for file-curator when run as a gear.
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.reporter = None
 
     def curate_file(self, file_: Dict[str, Any]):
+        """
+        Start here! This is "main" analog when this file is script input to file-curate run as a gear.
+
+        @param file_ is **dict** holding file curator (gear rule) info.
+                     ["location"]["path"] is the dicom zip input file
+
+        "additional-input-one" in get_input_path is
+        whatever the user specifies AFTER specifying this python file (shim_notify.py).
+        """
         zip_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
         dest_id = self.context.destination["id"]
-        main(zip_path, config_path, dest_id=dest_id, context=self.context)
+        main(zip_path, config_path, dest_id=dest_id, client=self.client)
 
 
+#: run as a script to exercise code without having to upload to flywheel
+#: when using with `dest_id` see export FLYWHEEL_API for changing site
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO").upper())
     if len(sys.argv) not in [3, 4]:
         print(
-            f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id]"
+            f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id=6899c986fbeb05f0ba422e90]"
         )
         sys.exit(1)
 
     zip_path = sys.argv[1]
     config_path = sys.argv[2]
-    dest_id = sys.argv[3] if len(sys.argv) == 4 else None
+    dest_id = None
+    client = None
+    if len(sys.argv) == 4:
+        print(f"Using new flywheel client for {dest_id}")
+        dest_id = sys.argv[3]
+        import flywheel
+        client = flywheel.Client()
 
-    main(zip_path, config_path, dest_id)
+    main(zip_path, config_path, dest_id, client)
