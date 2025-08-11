@@ -153,24 +153,24 @@ def read_emails(config: dict) -> list[dict]:
     ]
 
 
-def get_label(fw, dest_id : str|None) -> str:
+def get_label(fw, dest_id: str | None) -> str:
     """
     Use fw client to fetch dest_id subject label and creation time
 
     @param fw      Flywheel client
-    @param dest_id FW DB id of acquisition file-curate is run on, like 6899c92af38b72b829422da0
+    @param dest_id FW DB id of acquisition file-curate is run on, like 6899c986fbeb05f0ba422e90
     @return label and created date concatenated"""
     if fw is None or dest_id is None:
-        return ''
+        return ""
 
     if container := fw.get(dest_id):
         p = fw.get(container.parents.subject)
         # sesmod = str(fw.get(container.parents.session).get('timestamp'))
         # TODO: created timezone in Eastern
-        return p.get('label') + "@" + str(container.get('created'))
-    
+        return p.get("label") + "@" + str(container.get("created"))
+
     log.warning("No session for dest %s", dest_id)
-    return ''
+    return ""
 
 
 def main(zip_path: str, config_path: str, dest_id: str = None, client=None):
@@ -222,6 +222,7 @@ class Curator(FileCurator):
     Extend flywheels class to integrate with the file-curate gear.
     py:func:`Curator.curate_file` is launch point for file-curator when run as a gear.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.reporter = None
@@ -235,11 +236,22 @@ class Curator(FileCurator):
 
         "additional-input-one" in get_input_path is
         whatever the user specifies AFTER specifying this python file (shim_notify.py).
+
+        _file looks like
+        .. code:
+
+           {'hierarchy': {'id': '6899c986fbeb05f0ba422e90', 'type': 'acquisition'},
+            'object': {'type': 'dicom', 'mimetype': 'application/zip', 'modality': 'MR', 'classification':.... },
+            'location': {'path': '/flywheel/v0/input/file-input/1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip', 'name': '1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip'},
+           'base': 'file'}
         """
         zip_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
-        dest_id = self.context.destination["id"]
-        main(zip_path, config_path, dest_id=dest_id, client=self.client)
+        # dest_id = self.context.destination["id"] # this is where we're saving to
+        acq_id = file_["hierarchy"][
+            "id"
+        ]  #: this is the object we are working on (zip file)
+        main(zip_path, config_path, dest_id=acq_id, client=self.client)
 
 
 #: run as a script to exercise code without having to upload to flywheel
@@ -260,6 +272,7 @@ if __name__ == "__main__":
         print(f"Using new flywheel client for {dest_id}")
         dest_id = sys.argv[3]
         import flywheel
+
         client = flywheel.Client()
 
     main(zip_path, config_path, dest_id, client)
