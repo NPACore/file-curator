@@ -73,14 +73,6 @@ def load_toml_config(path: str) -> dict:
         return toml.load(f)
 
 
-<<<<<<< HEAD
-def station_to_name(station_id: str, station_map: dict) -> str:
-    return station_map.get(station_id, station_id)
-
-
-def short_scanner_name(scanner: str) -> str:
-    return {"PRISMA1": "P1", "PRISMA2": "P2", "PRISMA3": "P3"}.get(scanner, scanner)
-=======
 def _normalize_recipients(to_value) -> list[str]:
     """Accept list or comma-separated string and return a list of recipients."""
     if isinstance(to_value, list):
@@ -88,7 +80,6 @@ def _normalize_recipients(to_value) -> list[str]:
     if isinstance(to_value, str):
         return [x.strip() for x in to_value.split(",") if x.strip()]
     return []
->>>>>>> a8bd70d (updated for new specifications)
 
 
 def parse_config(config: dict) -> Tuple[dict, dict, list[dict]]:
@@ -212,7 +203,6 @@ def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
     raise ValueError("No valid DICOM found in zip.")
 
 
-<<<<<<< HEAD
 def read_emails(config: dict) -> list[dict]:
     recips = config["recipients"]
     return [
@@ -250,80 +240,43 @@ def main(zip_path: str, config_path: str, dest_id: str = None, client=None):
     zip_path : str
         Path to ZIP file containing DICOMs.
     config_path : str
-        Path to toml with email [recipients] settings, station_map, and thresholds.
+        Path to toml with either:
+          - new style [[scanner]] & [[emails]], or
+          - old style [station_map], [z_thresholds], [recipients].
     """
-=======
-def get_subject_label(session_id: str) -> str:
-    import flywheel
-    fw = flywheel.Client()
-    session = fw.get(session_id)
-
-    subject_ref = session.subject
-    try:
-        subject_id = subject_ref.id
-    except AttributeError:
-        subject_id = subject_ref if isinstance(subject_ref, str) else subject_ref.get('id')
-
-    subject = fw.get(subject_id)
-    return subject.label
-
-
-def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
->>>>>>> a8bd70d (updated for new specifications)
+    # Load + parse new/back-compat config
     config = load_toml_config(config_path)
     scanner_name_by_id, threshold_by_id, email_configs = parse_config(config)
 
+    # Read first DICOM and extract Z
     dcm = first_dicom_from_zip(zip_path)
     z = read_z(dcm)
 
-<<<<<<< HEAD
-    msg = notify_message(scanner, z, z_thresholds)
-
-    if session_label := get_label(client, dest_id):
-        msg += f"\nSession: {session_label}"
-    print(msg)
-
-    emoji = "✅" if z >= z_thresholds.get(scanner, 10000) else "⛔"
-    short_name = short_scanner_name(scanner)
-    subject = f"{emoji} {short_name} z ShimQA {'okay' if emoji == '✅' else 'BAD'}"
-=======
-    station_id = getattr(dcm, "StationName", "").strip() or "UNKNOWN"
+    # Map StationName -> display short name and threshold
+    station_id = (getattr(dcm, "StationName", "") or "").strip() or "UNKNOWN"
     display_name = scanner_name_by_id.get(station_id, station_id)
-    threshold = threshold_by_id.get(station_id, 10000.0)
+    threshold = float(threshold_by_id.get(station_id, 10000.0))
 
+    # Console line for logs
     print(f"# Z={z:.2f} from {display_name} (StationName={station_id})")
 
-    session_label = None
-    if dest_id:
-        try:
-            import flywheel
-            if context:
-                fw = flywheel.Client(context=context)
-            else:
-                fw = flywheel.Client()
-
-            container = fw.get(dest_id)
-
-            if container.container_type == "session":
-                session_label = get_subject_label(container.id)
-            else:
-                session_id = container.parents.get("session")
-                if session_id:
-                    session_label = get_subject_label(session_id)
-                else:
-                    log.warning(f"No session ID found for container {dest_id}")
-        except Exception as e:
-            log.warning(f"Failed to retrieve subject label for {dest_id}: {e}")
-
+    # Build notification message
     msg = notify_message(display_name, z, threshold)
-    if session_label:
-        msg += f"\nSession: {session_label}"
+
+    # Optional: append session label if available (uses your existing get_label)
+    try:
+        if session_label := get_label(client, dest_id):
+            msg += f"\nSession: {session_label}"
+    except Exception as e:
+        log.warning(f"Failed to retrieve session label for {dest_id}: {e}")
+
     print(msg)
 
+    # Subject line (uses display_name, which is already short like P1/P2 if configured)
     emoji = "✅" if z >= threshold else "⛔"
     subject = f"{emoji} {display_name} z ShimQA {'okay' if emoji == '✅' else 'BAD'}"
->>>>>>> a8bd70d (updated for new specifications)
 
+    # Send emails (email_configs already expanded to per-recipient dicts)
     for entry in email_configs:
         try:
             send_email(
@@ -334,8 +287,7 @@ def main(zip_path: str, config_path: str, dest_id: str = None, context=None):
                 host=entry["host"],
             )
         except Exception as e:
-            log.warning(f"Failed to send to {entry['to']} via {entry['host']}: {e}")
-
+            log.warning(f"Failed to send to {entry.get('to')} via {entry.get('host')}: {e}")
 
 class Curator(FileCurator):
     """
@@ -367,48 +319,31 @@ class Curator(FileCurator):
         """
         zip_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
-<<<<<<< HEAD
         # dest_id = self.context.destination["id"] # this is where we're saving to
         acq_id = file_["hierarchy"][
             "id"
         ]  #: this is the object we are working on (zip file)
         main(zip_path, config_path, dest_id=acq_id, client=self.client)
-=======
-        dest_id = self.context.destination["id"]
-        main(zip_path, config_path, dest_id=dest_id, context=self.context)
->>>>>>> a8bd70d (updated for new specifications)
 
 
 #: run as a script to exercise code without having to upload to flywheel
 #: when using with `dest_id` see export FLYWHEEL_API for changing site
 if __name__ == "__main__":
-<<<<<<< HEAD
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO").upper())
     if len(sys.argv) not in [3, 4]:
         print(
             f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id=6899c986fbeb05f0ba422e90]"
         )
-=======
-    logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper())
-    if len(sys.argv) not in [3, 4]:
-        print(f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id]")
->>>>>>> a8bd70d (updated for new specifications)
         sys.exit(1)
 
     zip_path = sys.argv[1]
     config_path = sys.argv[2]
-<<<<<<< HEAD
     dest_id = None
     client = None
     if len(sys.argv) == 4:
         print(f"Using new flywheel client for {dest_id}")
         dest_id = sys.argv[3]
         import flywheel
-=======
-    dest_id = sys.argv[3] if len(sys.argv) == 4 else None
-
-    main(zip_path, config_path, dest_id)
->>>>>>> a8bd70d (updated for new specifications)
 
         client = flywheel.Client()
 
