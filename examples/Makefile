@@ -1,21 +1,26 @@
 .SUFFIXES:
-.PHONY: all shim launch bids
+.PHONY: all shim launch bids test
 
-all: shim launch  bids
+all: test shim launch bids
 
 shim: .fw/qa/shim_upload.py .fw/qa/shim_settings.toml
 launch: .fw/launchqa # launch_qc.py
 bids: .fw/bids/complete_test.joblog  # complete_test.py
+test: .test.log
 
+upload_prereq_QA = for dest in fw://mrrc/Prisma{1,2,3}QA; do fw upload $< $$dest; done
 # string as make macro: run upload across all QA destinations (shell for loop)
 # hard codes first make recipete prerequisit ("$<") as file to upload
-upload_prereq_QA = for dest in fw://mrrc/Prisma{1,2,3}QA; do fw upload $< $$dest; done
 # this replaces repleated loop
 #  @echo "Uploading $< to Flywheel PRISMA projects..."
 #  @for dest in fw://mrrc/Prisma1QA fw://mrrc/Prisma2QA fw://mrrc/Prisma3QA; do \
 #  	fw upload "$<" "$$dest"; \
 #  done
 
+## all tests (2025-09-08: only tests for shim)
+.test.log: $(wildcard *.py tests/*.py)
+	test -r ../.venv && source ../.venv/bin/activate && \
+	python3 -m pytest tests/ | tee $@
 
 ## z-shim threshold test gear
 # Upload config TOML to all Flywheel Prisma projects
