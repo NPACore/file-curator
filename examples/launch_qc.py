@@ -77,8 +77,10 @@ class Curator(FileCurator):
     def curate_file(self, file_: Dict[str, Any]):
         """
         Entrypoint for file-curate gear.
+
         :param file_: dict (not flywheel.FileEntry) of specified file
                       or file which triggered gear from a gear rule.
+
         """
         log.info("looking at %s", file_)
         name = file_["location"]["name"]

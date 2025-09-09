@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
+#sys.path.insert(0, os.path.abspath('../../')) # 20250908WF - dont care about flywheel code for now :)
 sys.path.insert(0, os.path.abspath('../../examples'))
 
 
@@ -24,16 +24,13 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode', # Adds [source] links to the docs
               'sphinx.ext.autosummary'
               ]
-
-templates_path = ['_templates']
-exclude_patterns = []
-
-language = 'y'
-
-
 autosummary_generate = True
 
-autodoc_mock_imports = ["flywheel_gear_toolkit", "pydicom", "nibabel", "toml"]
+templates_path = ['_templates']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "docs", ".venv", "lib"]
+
+
+autodoc_mock_imports = ["flywheel_gear_toolkit", "pydicom", "nibabel", "toml", "flywheel"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

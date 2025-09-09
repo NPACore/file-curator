@@ -303,19 +303,20 @@ class Curator(FileCurator):
         """
         Start here! This is "main" analog when this file is script input to file-curate run as a gear.
 
-        @param file_ is **dict** holding file curator (gear rule) info.
-                     ["location"]["path"] is the dicom zip input file
+        :param file_: is **dict** holding file curator (gear rule) info.
+                      ["location"]["path"] is the dicom zip input file
 
         "additional-input-one" in get_input_path is
         whatever the user specifies AFTER specifying this python file (shim_notify.py).
 
-        _file looks like
-        .. code:
+        ``_file`` looks like
 
-           {'hierarchy': {'id': '6899c986fbeb05f0ba422e90', 'type': 'acquisition'},
-            'object': {'type': 'dicom', 'mimetype': 'application/zip', 'modality': 'MR', 'classification':.... },
-            'location': {'path': '/flywheel/v0/input/file-input/1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip', 'name': '1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip'},
-           'base': 'file'}
+        .. code-block:
+
+            {'hierarchy': {'id': '6899c986fbeb05f0ba422e90', 'type': 'acquisition'},
+             'object': {'type': 'dicom', 'mimetype': 'application/zip', 'modality': 'MR', 'classification':.... },
+             'location': {'path': '/flywheel/v0/input/file-input/1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip', 'name': '1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip'},
+            'base': 'file'}
         """
         zip_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
