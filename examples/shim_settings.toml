@@ -3,6 +3,11 @@ host = "upmc-edu.mail.protection.outlook.com"
 from = "no-reply@upmc.edu"
 to = ["flywheelgearlist@list.pitt.edu"]
 
+[[emails]]
+host = "128.147.59.133"
+from = "noreply@mrctr.upmc.edu"
+to = ["mrtechs@mrctr.upmc.edu"]
+
 [[scanner]]
 id = "MRC67078"
 shortname = "P1"
