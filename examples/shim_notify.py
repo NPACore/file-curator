@@ -205,10 +205,8 @@ def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
     Read inplace via stream, without extracting zip."""
 
     # HACK: expect zip, but special case if input is dicom
-    # outside of flywheel, we migth have .IMA, .DCM, or MR.*
-    #: within flywheel, expect all dicom files to have .dcm extention
-    if re.search(r".dcm$", zfname):
-        log.warning("Given dcm when zip expected. single dicom acquisition?")
+    if not re.search(r".zip$", str(zfname)):
+        log.warning("Not given a .zip, assuming file from single dicom acquisition?")
         return pydicom.dcmread(zfname)
 
     with ZipFile(zfname) as zf:

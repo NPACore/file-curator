@@ -1,8 +1,10 @@
 # examples/tests/test_shim.py
 from contextlib import contextmanager
+import os.path
 import pathlib
 import pytest
 import shim_notify
+from zipfile import ZipFile
 
 HERE = pathlib.Path(__file__).parent
 CONFIG_NEW = HERE.parent / "shim_settings.toml"
@@ -99,3 +101,19 @@ def test_main_with_overrides():
     assert subj.startswith("✅ P3 z ShimQA")
     assert "P3" in body and "okay" in body.lower()
 
+
+def test_first_dicom_from_zip(tmp_path):
+    "Check reading first dicom handles zip and dcm"
+    ziphead = shim_notify.first_dicom_from_zip("tests/dcm.zip")
+    inzippath = "PRISMA3QA2024/PRISMA3QA.MR.QA_PRISMA3QA.0003.0001.2024.08.09.18.15.49.154822.1380215093.IMA"
+    with ZipFile(EX_ZIP) as zf:
+        zf.extract(inzippath, tmp_path)
+    dcmhead = shim_notify.first_dicom_from_zip(tmp_path / inzippath)
+
+    assert ziphead is not None
+    assert dcmhead is not None
+
+    # might as well confirm both headers are the same agains the actual value
+    z = shim_notify.read_z(ziphead)
+    assert z == 11736.0
+    assert z == shim_notify.read_z(dcmhead)
