@@ -184,6 +184,14 @@ def read_z(dcm: pydicom.Dataset) -> float:
 
 
 def update_db(fw, dest_id, z: float):
+    """
+    UNUSED
+    Add z value to flywheel database at session level for searching.
+    This is done by heavier t/SNR QC pipeline.
+    @param fw  flywheel client object
+    @param dest_id id of acquisition file (use parents.session)
+    @param z    z-shim value to insert into DB
+    """
     container = fw.get(dest_id)
     if not container:
         raise Exception(f"No container with id '{dest_id}'")
@@ -195,6 +203,14 @@ def update_db(fw, dest_id, z: float):
 def first_dicom_from_zip(zfname: str) -> pydicom.Dataset:
     """Dicom header for first file in zip
     Read inplace via stream, without extracting zip."""
+
+    # HACK: expect zip, but special case if input is dicom
+    # outside of flywheel, we migth have .IMA, .DCM, or MR.*
+    #: within flywheel, expect all dicom files to have .dcm extention
+    if re.search(r".dcm$", zfname):
+        log.warning("Given dcm when zip expected. single dicom acquisition?")
+        return pydicom.dcmread(zfname)
+
     with ZipFile(zfname) as zf:
         for entry in zf.filelist:
             if entry.file_size > 0:
