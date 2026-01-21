@@ -22,3 +22,4 @@ examples/.test.log
 
 # secrets
 npac_api.fernet
+examples/mbsyncrc_mrrc
