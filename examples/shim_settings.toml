@@ -22,3 +22,15 @@ threshold = 4505.258657
 id = "MRC35073"
 shortname = "P3"
 threshold = 11652.571269
+
+# ---- 20260304WF --- 
+# new settings. can use output of fw-mrrcqa (stats.json with snr, tsnr, and shim values)
+[DefaultSettings]
+tsnr = { low =  50, high = 70}
+snr =  { low = 200, hight = 240}
+
+[scanners]
+MRC35073  = { shortname = "P3", zthresh = 11652.571269}
+AWP167046 = { shortname = "P2", zthresh = 4505.258657}
+MRC67078  = { shortname = "P1", zthresh = 9931.513661}
+default   = { shortname = "UNKNOWNSCANNER", zthres = 10000}

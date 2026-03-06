@@ -168,6 +168,10 @@ def send_email(
     msg["From"] = sender
     msg["To"] = recipient
     msg.set_content(body)
+    if os.environ.get("DRYRUN"):
+        print("DRYRUN -- no sending mail")
+        print(msg)
+        return
 
     log.info(f"Connecting to SMTP server: {host}")
     with SMTP(host, timeout=30) as srv:
@@ -245,7 +249,7 @@ def get_label(fw, dest_id: str | None) -> str:
     return ""
 
 
-def main(zip_path: str, config_path: str, dest_id: str = None, client=None):
+def zshim_main(zip_path: str, config_path: str, dest_id: str = None, client=None):
     """
     Run shim QC check and send email notifications.
 
@@ -331,13 +335,99 @@ class Curator(FileCurator):
             'location': {'path': '/flywheel/v0/input/file-input/1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip', 'name': '1.3.12.2.1107.5.2.43.167046.2025081106355462484301088.0.0.0.dicom.zip'},
            'base': 'file'}
         """
-        zip_path = file_["location"]["path"]
+        # a zip or json file
+        input_path = file_["location"]["path"]
         config_path = self.context.get_input_path("additional-input-one")
         # dest_id = self.context.destination["id"] # this is where we're saving to
-        acq_id = file_["hierarchy"][
-            "id"
-        ]  #: this is the object we are working on (zip file)
-        main(zip_path, config_path, dest_id=acq_id, client=self.client)
+
+        #: this is the object we are working on (zip file)
+        acq_id = file_["hierarchy"]["id"]
+
+        main(input_path, config_path, dest_id=acq_id, client=self.client)
+
+
+class Config():
+    "Hardcode defaults. Potentially overwrite with config file."
+    defaults = {'tsnr': {'low': 50, 'high': 70},   #: time signal to noise
+                'snr': {'low': 200, 'high': 240},  #: volume signal to noise
+                'ZuTm': {'low': 0, 'high': 10000}  #: Z shim in uTesla/meter
+                }
+
+    def __init__(self, config_path, scanner=None):
+        "Load toml. Set defaults"
+        self.config = load_toml_config(config_path)
+        self.fixed = self.config.get('DefaultSettings', self.defaults)
+        # TODO: if scanner:  check there too
+        self.scanner = self.config.get('scanners', {}).get(scanner)
+
+    def getfixed(self, key):
+        "Get a value from the config, reusing defaults."
+        return self.fixed.get(key, self.defaults.get(key))
+
+    def is_in_range(self, key: str, in_val: float) -> tuple[bool, str]:
+        """Is key measure within range of it's settings?
+        @param key measure to test (e.g 'tsnr')
+        @param in_val value (e.g. 62) that should be in range
+        @returns (True/False, message)"""
+        measure = self.getfixed(key)
+        low = measure.get('low')
+        high = measure.get('high')
+        inrange = in_val > high or in_val < low
+        if inrange:
+            msg = f"pass: {key} ({in_val}) between {low} - {high}."
+        else:
+            msg = f"ERROR! {key} ({in_val}) outside of {low} - {high} range!"
+        return (inrange,  msg)
+
+
+def json_main(json_path, config_path):
+    """
+    QA on stats.json from fw-mrrcqa gear:
+    Do SNR and tSNR look normal?
+    Are the shim values okay?
+    """
+    import json
+    with open(json_path, 'r') as fh:
+        data = json.load(fh)
+
+    station = data.get("dicominfo", {}).get("StationName")
+    config = Config(config_path, station)
+    #: names in config and key names in stats.json dont exactly match
+    stats = {'tsnr': data.get('tsnrpk'),
+             'snr': data.get('snrpk'),
+             'ZuTm': data.get('XYZ_uTm', []).get(2)}
+    # tests is like {tsnr: (True, "goodmessage"), snr: (False, "Bad message")}
+    tests = {k: config.is_in_range(k, stats[k]) for k in stats.keys()}
+
+    # set subject based on if any stats check fails
+    okay = all(v[0] for v in tests.values())
+    if okay:
+        subj = "✅ PhantomQA okay"
+    else:
+        failures = [f"{k}@{stats[k]}"
+                    for k, v in tests.items()
+                    if not v[0]]
+        subj = f"⛔ PhantomQA FAILED: {' '.join(failures)}"
+
+    # enumerate all messages (pass or fail) for body of email.
+    msg = "\n".join(["  *  " + v[1] for v in tests.values()])
+
+    for mailinfo in config.config.get('emails', []):
+        send_email(subj, msg, mailinfo['from'],
+                   ",".join(mailinfo['to']),
+                   mailinfo['host'])
+
+
+def main(input_path, config_path, dest_id, client):
+    """
+    Disbatch to json or zshim runniner based on input file name
+    20260304WF - added json alerting. can use many more parameters, not just z shim value
+    json built by gear rules (new phantom ep2d) running https://github.com/NPACore/fw-mrrcqa/
+    """
+    if re.search(r'.json$', input_path):
+        json_main(input_path, config_path)
+    else:
+        zshim_main(input_path, config_path, dest_id, client)
 
 
 #: run as a script to exercise code without having to upload to flywheel
@@ -346,13 +436,14 @@ if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO").upper())
     if len(sys.argv) not in [3, 4]:
         print(
-            f"Usage: {sys.argv[0]} <dicom.zip> <shim_settings.toml> [flywheel_dest_id=6899c986fbeb05f0ba422e90]"
+            f"Usage: {sys.argv[0]} <dicom.zip|stats.json> <shim_settings.toml> [flywheel_dest_id=6899c986fbeb05f0ba422e90]" +
+            "\nuse DRYRUN=1 to see message but not send"
         )
         sys.exit(1)
 
     zip_path = sys.argv[1]
     config_path = sys.argv[2]
-    dest_id = None
+    dest_id = ""
     client = None
     if len(sys.argv) == 4:
         print(f"Using new flywheel client for {dest_id}")
@@ -361,4 +452,9 @@ if __name__ == "__main__":
 
         client = flywheel.Client()
 
-    main(zip_path, config_path, dest_id, client)
+    # 20260304WF - added json alerting. can use many more parameters, not just z shim value
+    # json built by gear rules (new phantom ep2d) running https://github.com/NPACore/fw-mrrcqa/
+    if re.search(r'.json$', zip_path):
+        json_main(zip_path, config_path)
+    else:
+        zshim_main(zip_path, config_path, dest_id, client)
